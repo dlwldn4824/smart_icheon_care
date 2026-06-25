@@ -1,0 +1,299 @@
+{
+  "meta": {
+    "generatedAt": "2026-06-25T02:26:48.983Z",
+    "bases": {
+      "parkingLots": 109,
+      "parks": 44,
+      "protectionZones": 81,
+      "totalParkingSpaces": 6733,
+      "schoolZones": 55,
+      "shortageZones": 28,
+      "activeCctvFeeds": 4
+    }
+  },
+  "heroSeries": [
+    {
+      "label": "4월1주",
+      "cctv": 91,
+      "parking": 73,
+      "facility": 44
+    },
+    {
+      "label": "4월2주",
+      "cctv": 104,
+      "parking": 77,
+      "facility": 44
+    },
+    {
+      "label": "4월3주",
+      "cctv": 93,
+      "parking": 70,
+      "facility": 40
+    },
+    {
+      "label": "4월4주",
+      "cctv": 96,
+      "parking": 76,
+      "facility": 43
+    },
+    {
+      "label": "5월1주",
+      "cctv": 95,
+      "parking": 78,
+      "facility": 45
+    },
+    {
+      "label": "5월2주",
+      "cctv": 86,
+      "parking": 64,
+      "facility": 39
+    },
+    {
+      "label": "5월3주",
+      "cctv": 90,
+      "parking": 67,
+      "facility": 35
+    },
+    {
+      "label": "5월4주",
+      "cctv": 85,
+      "parking": 72,
+      "facility": 41
+    },
+    {
+      "label": "6월1주",
+      "cctv": 86,
+      "parking": 75,
+      "facility": 41
+    },
+    {
+      "label": "6월2주",
+      "cctv": 77,
+      "parking": 70,
+      "facility": 35
+    },
+    {
+      "label": "6월3주",
+      "cctv": 85,
+      "parking": 62,
+      "facility": 43
+    },
+    {
+      "label": "6월4주",
+      "cctv": 85,
+      "parking": 68,
+      "facility": 40
+    }
+  ],
+  "trends": [
+    {
+      "id": "dt1",
+      "title": "민원 발생 추이",
+      "subtitle": "최근 30일",
+      "value": 23,
+      "unit": "건",
+      "changePercent": -8.3,
+      "iconName": "complaint",
+      "data": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "labels": [
+        "6/03",
+        "6/05",
+        "6/07",
+        "6/09",
+        "6/11",
+        "6/13",
+        "6/15",
+        "6/17",
+        "6/19",
+        "6/21",
+        "6/23",
+        "6/25"
+      ],
+      "color": "#4F7FFF"
+    },
+    {
+      "id": "dt2",
+      "title": "시설 관리 활동",
+      "subtitle": "최근 30일",
+      "value": 68,
+      "unit": "건",
+      "changePercent": -21.1,
+      "iconName": "facility",
+      "data": [
+        6,
+        7,
+        7,
+        7,
+        6,
+        5,
+        4,
+        6,
+        5,
+        5,
+        5,
+        5
+      ],
+      "labels": [
+        "6/03",
+        "6/05",
+        "6/07",
+        "6/09",
+        "6/11",
+        "6/13",
+        "6/15",
+        "6/17",
+        "6/19",
+        "6/21",
+        "6/23",
+        "6/25"
+      ],
+      "color": "#22C55E"
+    },
+    {
+      "id": "dt3",
+      "title": "불법 주차 단속",
+      "subtitle": "최근 30일",
+      "value": 115,
+      "unit": "건",
+      "changePercent": -14.5,
+      "iconName": "parking",
+      "data": [
+        9,
+        11,
+        11,
+        12,
+        11,
+        8,
+        7,
+        9,
+        8,
+        10,
+        9,
+        10
+      ],
+      "labels": [
+        "6/03",
+        "6/05",
+        "6/07",
+        "6/09",
+        "6/11",
+        "6/13",
+        "6/15",
+        "6/17",
+        "6/19",
+        "6/21",
+        "6/23",
+        "6/25"
+      ],
+      "color": "#FF8A4C"
+    },
+    {
+      "id": "dt4",
+      "title": "제설 진행률",
+      "subtitle": "32 / 50 구간",
+      "value": 64,
+      "unit": "%",
+      "changePercent": 226.7,
+      "iconName": "snow",
+      "data": [
+        0,
+        3,
+        6,
+        9,
+        12,
+        15,
+        17,
+        20,
+        23,
+        26,
+        29,
+        32
+      ],
+      "labels": [
+        "6/03",
+        "6/05",
+        "6/07",
+        "6/09",
+        "6/11",
+        "6/13",
+        "6/15",
+        "6/17",
+        "6/19",
+        "6/21",
+        "6/23",
+        "6/25"
+      ],
+      "color": "#A78BFA",
+      "isProgress": true,
+      "progress": {
+        "total": 50,
+        "current": 32
+      }
+    }
+  ],
+  "aiDetectionWeekly": [
+    {
+      "day": "월",
+      "count": 11
+    },
+    {
+      "day": "화",
+      "count": 12
+    },
+    {
+      "day": "수",
+      "count": 12
+    },
+    {
+      "day": "목",
+      "count": 11
+    },
+    {
+      "day": "금",
+      "count": 12
+    },
+    {
+      "day": "토",
+      "count": 7
+    },
+    {
+      "day": "일",
+      "count": 8
+    }
+  ],
+  "aiDailySummary": [
+    {
+      "label": "긴급",
+      "count": 2,
+      "color": "#EF4444"
+    },
+    {
+      "label": "높음",
+      "count": 5,
+      "color": "#F97316"
+    },
+    {
+      "label": "보통",
+      "count": 8,
+      "color": "#FBBF24"
+    },
+    {
+      "label": "안전",
+      "count": 138,
+      "color": "#22C55E"
+    }
+  ]
+}

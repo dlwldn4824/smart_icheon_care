@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw public data (large CSV/XLS — regenerate via npm run build:data)
+/공공데이터/

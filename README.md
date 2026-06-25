@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Icheon Care (스마트 이천 케어)
 
-## Getting Started
+AI 기반 도시 인프라 통합 관리 대시보드 프로토타입입니다.
 
-First, run the development server:
+## 실행 방법
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3000](http://localhost:3000) 접속
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 화면 구성
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 경로 | 설명 |
+|------|------|
+| `/dashboard` | 메인 대시보드 (GIS 지도, AI 리스크 카드, 시설 테이블) |
+| `/parking-analysis` | 주차 갈등 분석 (히트맵, 핫스팟, 차트) |
+| `/cctv` | AI CCTV 모니터링 (실시간 탐지, 이력, 분석) |
+| `/mobile` | 시민용 앱 홈 |
+| `/mobile/report` | 민원 신고 |
+| `/mobile/complaints` | 내 민원 현황 |
 
-## Learn More
+## VWorld 지도 API 연동
 
-To learn more about Next.js, take a look at the following resources:
+이천시 실제 지도는 **국토교통부 VWorld(브이월드)** API를 사용합니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### API 키 발급 (무료)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. [VWorld 회원가입](https://www.vworld.kr/v4po_main.do)
+2. [오픈API → 인증키 발급](https://www.vworld.kr/dev/v4api_keyApply.do)
+3. 서비스 선택: **2D지도 API** 또는 **WMTS/TMS API**
+4. 도메인 등록: `http://localhost:3000` (개발), 배포 URL (운영)
 
-## Deploy on Vercel
+### 설정
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cp .env.example .env.local
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`.env.local`에 키 입력:
+
+```
+NEXT_PUBLIC_VWORLD_API_KEY=발급받은_인증키
+```
+
+서버 재시작 후 지도 좌상단에 **VWorld API** 뱃지가 표시됩니다.
+
+> API 키 없이도 **VWorld 데모** 타일로 이천시 지도가 표시됩니다.
+
+## Tech Stack
+
+- Next.js 16 + React 19 + TypeScript
+- Tailwind CSS 4
+- **Leaflet + VWorld** (GIS 지도)
+- Recharts (차트)
+- Lucide React (아이콘)
+
+## 프로젝트 구조
+
+```
+src/
+├── app/              # 페이지 라우트
+├── components/       # UI 컴포넌트
+│   ├── dashboard/    # 대시보드 전용
+│   ├── parking/      # 주차 분석
+│   ├── cctv/         # CCTV 모니터링
+│   ├── mobile/       # 시민용 앱
+│   ├── map/          # VWorld + Leaflet 지도
+│   └── layout/       # AppShell
+├── data/mock.ts      # 목업 데이터
+└── types/            # TypeScript 타입
+```

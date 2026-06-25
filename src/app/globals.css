@@ -1,26 +1,76 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #eef1f8;
+  --foreground: #1e293b;
+  --primary: #4f7cff;
+  --primary-soft: #e8efff;
+  --accent: #ff8a4c;
+  --accent-soft: #fff3eb;
+  --card: #ffffff;
+  --muted: #94a3b8;
+  --border: #e8edf5;
+  --sidebar: #ffffff;
+  --sidebar-hover: #f4f7fc;
+  --sidebar-active: #4f7cff;
+  --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06);
+  --radius-card: 1.25rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Pretendard", "Apple SD Gothic Neo", sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  max-width: 100vw;
+}
+
+body[data-mobile="true"] {
+  overflow: auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  font-family: inherit;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.leaflet-control-attribution {
+  font-size: 8px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+.elevated-card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
 }
