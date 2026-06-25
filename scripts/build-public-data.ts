@@ -101,6 +101,18 @@ function readCsvFile(filename: string, encoding: "utf-8" | "cp949"): Record<stri
   return parseCsv(content);
 }
 
+const REQUIRED_CSV = [
+  "경기도_이천시_어린이보호구역_20260122.csv",
+  "경기도_이천시_노인장애인보호구역_20260522.csv",
+  "전국주차장정보표준데이터.csv",
+  "전국도시공원정보표준데이터.csv",
+] as const;
+
+function hasSourceCsvFiles(): boolean {
+  if (!fs.existsSync(DATA_DIR)) return false;
+  return REQUIRED_CSV.every((name) => fs.existsSync(path.join(DATA_DIR, name)));
+}
+
 function dedupeKey(name: string, lat: number, lng: number): string {
   return `${name}|${lat.toFixed(5)}|${lng.toFixed(5)}`;
 }
@@ -238,6 +250,20 @@ function loadParks(): ParkRecord[] {
 }
 
 function main() {
+  if (!hasSourceCsvFiles()) {
+    if (fs.existsSync(OUT_FILE)) {
+      console.log(
+        "Skip public data build: 공공데이터 CSV 없음 — 기존 generated/icheon.json 사용 (Vercel/CI 배포용)",
+      );
+      return;
+    }
+    console.error(
+      "공공데이터 CSV가 없고 generated/icheon.json도 없습니다.\n" +
+        "로컬에서 CSV를 공공데이터/에 넣고 npm run build:data 를 실행하세요.",
+    );
+    process.exit(1);
+  }
+
   const childZones = loadChildProtectionZones();
   const elderlyZones = loadElderlyProtectionZones();
   const parkingLots = loadParkingLots();
