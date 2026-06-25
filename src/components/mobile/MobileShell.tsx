@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Car, Flag, Home, Menu, Snowflake, Trees } from "lucide-react";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 import { initialNotifications, complaints, notices } from "@/data/mock";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
@@ -37,8 +38,8 @@ export function MobileShell({
             </Link>
           ) : (
             <div>
-              <h1 className="text-base font-bold">스마트 이천 케어</h1>
-              <p className="text-xs text-muted">📍 이천시 설봉동</p>
+              <BrandLogo priority height={26} maxWidth={128} />
+              <p className="mt-1.5 text-xs text-muted">📍 이천시 설봉동</p>
             </div>
           )}
           {!showBack && (

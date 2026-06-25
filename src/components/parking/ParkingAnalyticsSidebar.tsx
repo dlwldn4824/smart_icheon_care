@@ -126,24 +126,43 @@ export function ParkingAnalyticsSidebar() {
           <CardTitle>구역별 갈등 비율</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={130}>
-            <PieChart>
-              <Pie
-                data={conflictByArea}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={35}
-                outerRadius={55}
-              >
-                {conflictByArea.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="flex items-center gap-3">
+            <div className="w-[48%] shrink-0">
+              <ResponsiveContainer width="100%" height={130}>
+                <PieChart>
+                  <Pie
+                    data={conflictByArea}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={32}
+                    outerRadius={52}
+                    paddingAngle={2}
+                  >
+                    {conflictByArea.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} stroke="none" />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="min-w-0 flex-1 space-y-2">
+              {conflictByArea.map((entry) => (
+                <li key={entry.name} className="flex items-center gap-2 text-xs">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: entry.color }}
+                    aria-hidden
+                  />
+                  <span className="min-w-0 flex-1 truncate text-slate-700">{entry.name}</span>
+                  <span className="shrink-0 font-bold tabular-nums text-slate-900">
+                    {entry.value}%
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </CardContent>
       </Card>
 

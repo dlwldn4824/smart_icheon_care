@@ -11,13 +11,14 @@ import {
   Wrench,
 } from "lucide-react";
 import { facilities, maintenanceRecords } from "@/data/mock";
-import { getAllParkMarkers } from "@/lib/public-data";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import type { FacilityRow, Priority } from "@/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { MapApiBadge } from "@/components/map/MapApiBadge";
 import dynamic from "next/dynamic";
+import type { MapMarker } from "@/types";
 
 const IcheonVWorldMap = dynamic(() => import("@/components/map/IcheonVWorldMap"), {
   ssr: false,
@@ -74,6 +75,18 @@ export function FacilityManagementView() {
     });
   }, [search, typeFilter, priorityFilter]);
 
+  const facilityMarkers = useMemo<MapMarker[]>(
+    () =>
+      filtered.map((f) => ({
+        id: f.id,
+        type: "park",
+        lat: f.lat,
+        lng: f.lng,
+        label: f.name,
+      })),
+    [filtered],
+  );
+
   const facilityMaintenance = maintenanceRecords.filter((m) => m.facilityId === selected.id);
 
   return (
@@ -95,60 +108,79 @@ export function FacilityManagementView() {
         </div>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          { label: "전체 시설", value: stats.total, icon: Building2, color: "text-blue-600 bg-blue-50" },
-          { label: "긴급·높음", value: stats.urgent, icon: AlertTriangle, color: "text-red-600 bg-red-50" },
-          { label: "점검 진행중", value: stats.inProgress, icon: Wrench, color: "text-orange-600 bg-orange-50" },
-          { label: "정상", value: stats.normal, icon: CheckCircle, color: "text-green-600 bg-green-50" },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <div key={s.label} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className={cn("rounded-lg p-2.5", s.color)}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{s.value}</p>
-                <p className="text-xs text-muted">{s.label}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* 통계 · 검색(좌) + 시설 위치 지도(우) */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-stretch">
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "전체 시설", value: stats.total, icon: Building2, color: "text-blue-600 bg-blue-50" },
+              { label: "긴급·높음", value: stats.urgent, icon: AlertTriangle, color: "text-red-600 bg-red-50" },
+              { label: "점검 진행중", value: stats.inProgress, icon: Wrench, color: "text-orange-600 bg-orange-50" },
+              { label: "정상", value: stats.normal, icon: CheckCircle, color: "text-green-600 bg-green-50" },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <div
+                  key={s.label}
+                  className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
+                >
+                  <div className={cn("rounded-lg p-2", s.color)}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-slate-900">{s.value}</p>
+                    <p className="text-[11px] text-muted">{s.label}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-      {/* 필터 + 검색 */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            placeholder="시설명, 주소, AI 상태 검색..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-blue-100"
-          />
+          <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 flex-1 sm:min-w-[160px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                placeholder="시설명, 주소, AI 상태 검색..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-primary"
+            >
+              {facilityTypes.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value as (typeof priorityFilters)[number])}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-primary"
+            >
+              {priorityFilters.map((p) => (
+                <option key={p}>{p}</option>
+              ))}
+            </select>
+            <span className="shrink-0 text-xs text-muted">{filtered.length}건</span>
+          </div>
         </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-primary"
-        >
-          {facilityTypes.map((t) => (
-            <option key={t}>{t}</option>
-          ))}
-        </select>
-        <select
-          value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value as (typeof priorityFilters)[number])}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-primary"
-        >
-          {priorityFilters.map((p) => (
-            <option key={p}>{p}</option>
-          ))}
-        </select>
-        <span className="text-xs text-muted">{filtered.length}건</span>
+
+        <div className="flex min-h-[280px] flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm lg:min-h-0">
+          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-slate-800">시설 위치 지도</span>
+            </div>
+            <MapApiBadge />
+          </div>
+          <div className="relative min-h-[220px] flex-1">
+            <IcheonVWorldMap zones={[]} markers={facilityMarkers} clusterMarkers={false} />
+          </div>
+        </div>
       </div>
 
       {/* 메인: 테이블 + 상세 */}
@@ -295,21 +327,6 @@ export function FacilityManagementView() {
                   </div>
                 ))
               )}
-            </div>
-          </div>
-
-          {/* 미니 지도 */}
-          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-2.5">
-              <MapPin className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-slate-800">시설 위치</span>
-            </div>
-            <div className="h-36">
-              <IcheonVWorldMap
-                zones={[]}
-                markers={getAllParkMarkers()}
-                clusterMarkers={false}
-              />
             </div>
           </div>
         </div>

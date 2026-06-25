@@ -146,7 +146,7 @@ export interface SnowRemovalRoute {
 export interface NavItem {
   href: string;
   label: string;
-  iconName: "layout" | "building" | "car" | "snowflake" | "flag" | "message" | "file" | "settings";
+  iconName: "layout" | "building" | "car" | "snowflake" | "flag" | "message" | "file" | "settings" | "shield";
   ready?: boolean;
 }
 
@@ -205,4 +205,60 @@ export interface RegisteredAction {
   memo?: string;
   registeredAt: string;
   status: "assigned" | "in_progress" | "completed";
+}
+
+export type BollardStatus = "raised" | "lowered" | "raising" | "lowering" | "maintenance";
+export type BollardControlMode = "auto" | "manual" | "market_day";
+export type BollardDangerLevel = "safe" | "warning" | "danger";
+
+export interface BollardSurroundingDetection {
+  pedestrian: boolean;
+  vehicle: boolean;
+  bicycle: boolean;
+  obstacle: boolean;
+}
+
+export interface BollardSafetyChecks {
+  noPedestrian: boolean;
+  noVehicle: boolean;
+  noObstacle: boolean;
+  warningSoundOk: boolean;
+  cctvOk: boolean;
+}
+
+export interface BollardUnit {
+  id: string;
+  location: string;
+  status: BollardStatus;
+  statusLabel: string;
+  dangerLevel: BollardDangerLevel;
+  dangerLabel: string;
+  mode: BollardControlMode;
+  modeLabel: string;
+  detailModeLabel: string;
+  lastOperatedAt: string;
+  actionLabel: string;
+  targetAction: "raise" | "lower";
+  surrounding: BollardSurroundingDetection;
+  safetyChecks: BollardSafetyChecks;
+}
+
+export interface BollardOperationLog {
+  id: string;
+  time: string;
+  message: string;
+}
+
+export interface BollardSummary {
+  total: number;
+  raising: number;
+  lowering: number;
+  maintenance: number;
+}
+
+export interface BollardSchedule {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+  repeatLabel: string;
 }

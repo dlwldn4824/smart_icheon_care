@@ -124,48 +124,52 @@ export function NotificationBell() {
               notifications.map((n) => {
                 const style = typeStyle[n.type];
                 return (
-                  <button
+                  <div
                     key={n.id}
-                    type="button"
-                    onClick={() => handleNotificationClick(n)}
                     className={cn(
-                      "flex w-full items-start gap-3 border-b border-gray-50 px-4 py-3 text-left transition-colors hover:bg-slate-50",
+                      "flex items-start gap-1 border-b border-gray-50",
                       !n.read && "bg-blue-50/40",
                     )}
                   >
-                    <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", style.dot)} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                            style.bg,
-                            n.type === "urgent" && "text-red-700",
-                            n.type === "warning" && "text-orange-700",
-                            n.type === "info" && "text-blue-700",
-                            n.type === "success" && "text-green-700",
+                    <button
+                      type="button"
+                      onClick={() => handleNotificationClick(n)}
+                      className="flex min-w-0 flex-1 items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50"
+                    >
+                      <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", style.dot)} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              "rounded px-1.5 py-0.5 text-[10px] font-medium",
+                              style.bg,
+                              n.type === "urgent" && "text-red-700",
+                              n.type === "warning" && "text-orange-700",
+                              n.type === "info" && "text-blue-700",
+                              n.type === "success" && "text-green-700",
+                            )}
+                          >
+                            {style.label}
+                          </span>
+                          <span className="text-[10px] text-muted">{n.category}</span>
+                          {!n.read && (
+                            <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                           )}
-                        >
-                          {style.label}
-                        </span>
-                        <span className="text-[10px] text-muted">{n.category}</span>
-                        {!n.read && (
-                          <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                        )}
+                        </div>
+                        <p className="mt-0.5 text-xs font-semibold text-slate-800">{n.title}</p>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] text-muted">{n.message}</p>
+                        <p className="mt-1 text-[10px] text-muted">{n.time}</p>
                       </div>
-                      <p className="mt-0.5 text-xs font-semibold text-slate-800">{n.title}</p>
-                      <p className="mt-0.5 line-clamp-2 text-[11px] text-muted">{n.message}</p>
-                      <p className="mt-1 text-[10px] text-muted">{n.time}</p>
-                    </div>
+                    </button>
                     <button
                       type="button"
                       onClick={(e) => dismiss(n.id, e)}
-                      className="shrink-0 rounded p-0.5 text-muted hover:bg-slate-200 hover:text-slate-600"
+                      className="mr-2 mt-3 shrink-0 rounded p-0.5 text-muted hover:bg-slate-200 hover:text-slate-600"
                       aria-label="알림 삭제"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
-                  </button>
+                  </div>
                 );
               })
             )}

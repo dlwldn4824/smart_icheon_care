@@ -107,7 +107,7 @@ export function SmartCityMap({
           "relative isolate min-h-0 overflow-hidden",
           fill && "flex-1",
           !fill && compact && "h-[180px]",
-          !fill && !compact && large && "h-[clamp(240px,36vh,360px)]",
+          !fill && !compact && large && "h-[clamp(280px,48vh,520px)]",
           !fill && !compact && !large && "h-[clamp(180px,26vh,260px)]",
         )}
       >

@@ -13,7 +13,13 @@ import { ActionRegisterDialog } from "@/components/actions/ActionRegisterDialog"
 import { useToast } from "@/components/ui/Toast";
 import type { ActionSourceType, RegisteredAction } from "@/types";
 
-const STORAGE_KEY = "smart-icheon-registered-actions";
+const STORAGE_KEY = "smart-icheon-registered-actions-v2";
+const LEGACY_STORAGE_KEY = "smart-icheon-registered-actions";
+const RESET_RECOMMENDATIONS_FLAG = "smart-icheon-reset-recommendations-v1";
+
+function withoutRecommendations(actions: RegisteredAction[]): RegisteredAction[] {
+  return actions.filter((a) => a.sourceType !== "recommendation");
+}
 
 export interface ActionRegisterPayload {
   sourceType: ActionSourceType;
@@ -55,7 +61,25 @@ export function ActionRegistryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setActions(JSON.parse(raw) as RegisteredAction[]);
+      const shouldResetRecommendations = !localStorage.getItem(RESET_RECOMMENDATIONS_FLAG);
+
+      if (raw) {
+        let parsed = JSON.parse(raw) as RegisteredAction[];
+        if (shouldResetRecommendations) {
+          parsed = withoutRecommendations(parsed);
+          localStorage.setItem(RESET_RECOMMENDATIONS_FLAG, "1");
+        }
+        setActions(parsed);
+      } else {
+        const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (legacy) {
+          setActions(withoutRecommendations(JSON.parse(legacy) as RegisteredAction[]));
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+        }
+        if (shouldResetRecommendations) {
+          localStorage.setItem(RESET_RECOMMENDATIONS_FLAG, "1");
+        }
+      }
     } catch {
       setActions([]);
     } finally {

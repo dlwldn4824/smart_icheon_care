@@ -211,13 +211,13 @@ export function SnowRemovalManagementView() {
         <span className="text-xs text-muted">{filtered.length}건</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3 xl:items-stretch">
+        <div className="flex flex-col gap-4 xl:col-span-2">
           <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
             <div className="border-b border-gray-100 px-4 py-3">
               <span className="text-sm font-semibold text-slate-800">제설 구간 목록</span>
             </div>
-            <div className="max-h-[420px] overflow-auto">
+            <div className="max-h-[260px] overflow-auto">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-slate-50 text-left text-xs text-muted">
                   <tr>
@@ -279,15 +279,34 @@ export function SnowRemovalManagementView() {
               )}
             </div>
           </div>
+
+          <Card>
+            <CardHeader className="py-2.5">
+              <CardTitle>주간 제설 실적</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-44">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={snowRemovalProgressDaily}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="day" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Bar dataKey="completed" name="완료" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="space-y-4">
-          <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="border-b border-gray-100 px-4 py-3">
+        <div className="flex flex-col xl:col-span-1">
+          <div className="flex h-full flex-col rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="shrink-0 border-b border-gray-100 px-4 py-3">
               <span className="text-sm font-semibold text-slate-800">구간 상세</span>
             </div>
-            <div className="space-y-3 p-4">
-              <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100">
+            <div className="flex flex-1 flex-col gap-3 p-4">
+              <div className="relative aspect-video shrink-0 overflow-hidden rounded-lg bg-slate-100">
                 <Image
                   src="/images/snow-removal-square.png"
                   alt="제설 작업 현장"
@@ -339,7 +358,7 @@ export function SnowRemovalManagementView() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="mt-auto flex gap-2 pt-2">
                 <Button
                   size="sm"
                   className="flex-1"
@@ -358,25 +377,6 @@ export function SnowRemovalManagementView() {
               </div>
             </div>
           </div>
-
-          <Card>
-            <CardHeader className="py-2.5">
-              <CardTitle>주간 제설 실적</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={snowRemovalProgressDaily}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Bar dataKey="completed" name="완료" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

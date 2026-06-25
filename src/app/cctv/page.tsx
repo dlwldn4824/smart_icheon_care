@@ -1,6 +1,4 @@
-import { CCTVFeedGrid } from "@/components/cctv/CCTVFeedCard";
 import { GrassOvergrowthExample } from "@/components/cctv/GrassOvergrowthExample";
-import { SnowRemovalExample } from "@/components/cctv/SnowRemovalExample";
 import { IllegalBannerExample } from "@/components/cctv/IllegalBannerExample";
 import { IllegalParkingExample } from "@/components/cctv/IllegalParkingExample";
 import { DetectionAnalytics } from "@/components/cctv/DetectionAnalytics";
@@ -29,14 +27,11 @@ export default function CCTVPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <IllegalBannerExample />
-        <IllegalParkingExample />
-        <GrassOvergrowthExample />
-        <SnowRemovalExample />
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:items-stretch">
+        <IllegalBannerExample className="lg:col-span-8" />
+        <IllegalParkingExample className="lg:col-span-2" />
+        <GrassOvergrowthExample className="lg:col-span-2" />
       </div>
-
-      <CCTVFeedGrid />
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <DetectionTimeline />

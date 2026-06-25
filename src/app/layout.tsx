@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Smart Icheon Care | 스마트 이천 케어",
   description: "AI 기반 도시 인프라 통합 관리 플랫폼",
+  icons: {
+    icon: "/images/smart-icheon-care-logo.jpeg",
+    apple: "/images/smart-icheon-care-logo.jpeg",
+  },
 };
 
 export default function RootLayout({
