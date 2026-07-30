@@ -61,12 +61,15 @@ function levelToTier(level: string | undefined, risk: number): BannerReviewTier 
 function apiStatusToLocal(status: string): BannerCandidateStatus {
   switch (status) {
     case "REVIEWING":
+    case "REVIEW_PENDING":
     case "TRACKING":
       return "reviewing";
     case "DISMISSED":
       return "held";
     case "RESOLVED":
     case "CONFIRMED":
+    case "ASSIGNED":
+    case "IN_PROGRESS":
     case "FINISHED":
       return "resolved";
     default:
@@ -241,7 +244,7 @@ function CandidateDetail({
           onClick={() => {
             onStatus("reviewing");
             toast("검토 중으로 표시했습니다.", "info");
-            if (live) void patchVisionEventStatus(candidate.id, "REVIEWING").catch(() => undefined);
+            if (live) void patchVisionEventStatus(candidate.id, "REVIEW_PENDING").catch(() => undefined);
           }}
         >
           <Eye className="mr-1 h-3.5 w-3.5" />
@@ -263,7 +266,10 @@ function CandidateDetail({
           size="sm"
           variant="outline"
           onClick={() => {
-            openRegister();
+            openRegister(
+              `현수막 조치 · ${candidate.id}`,
+              `${candidate.location} · 불법 ${candidate.illegalScore} · 우선순위 ${candidate.priorityScore}`,
+            );
             toast("조치 등록을 엽니다.", "info");
           }}
         >
@@ -275,7 +281,10 @@ function CandidateDetail({
           onClick={() => {
             onStatus("resolved");
             toast("처리 완료로 기록했습니다. 최종 행정 판단은 담당자 확인 기준입니다.", "success");
-            if (live) void patchVisionEventStatus(candidate.id, "RESOLVED").catch(() => undefined);
+            if (live)
+              void patchVisionEventStatus(candidate.id, "RESOLVED", "dashboard-officer").catch(
+                () => undefined,
+              );
           }}
         >
           <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
