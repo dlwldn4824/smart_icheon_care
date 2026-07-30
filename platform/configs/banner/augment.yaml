@@ -1,0 +1,11 @@
+# Albumentations probabilities for offline / custom trainer path
+RandomBrightnessContrast: 0.5
+HueSaturationValue: 0.4
+MotionBlur: 0.25
+GaussNoise: 0.2
+RandomRain: 0.15
+RandomFog: 0.10
+RandomSnow: 0.08
+Perspective: 0.35
+HorizontalFlip: 0.5
+CLAHE: 0.2

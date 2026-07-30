@@ -1,0 +1,6 @@
+camera_id,latitude,longitude,heading,admin_district,district,location_name,is_sample
+CCTV-001,37.27950,127.44200,90,설봉동,설봉동,설봉공원 입구,true
+CCTV-002,37.30500,127.50500,180,장호원읍,장호원읍,장호원 사거리,true
+CCTV-003,37.27900,127.44900,270,안흥동,안흥동,안흥동 상권,true
+CCTV-004,37.26600,127.44300,0,중앙동,중앙동,이천역 광장 게시대,true
+CCTV-005,37.28400,127.43300,135,설봉동,설봉동,설봉초등학교 통학로,true

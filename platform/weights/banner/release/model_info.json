@@ -1,0 +1,17 @@
+{
+  "model": "YOLO11s",
+  "dataset": "banner_mvp_all",
+  "epochs": 30,
+  "imgsz": 640,
+  "classes": [
+    "banner"
+  ],
+  "precision": 0.6329142711541369,
+  "recall": 0.5550646891763963,
+  "map50": 0.43846124866365743,
+  "map50_95": 0.2785742079141935,
+  "f1": 0.5914386953380578,
+  "tiny_recall": 0.22023809523809523,
+  "weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/release/best.pt",
+  "date": "2026-07-29"
+}

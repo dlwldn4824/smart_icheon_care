@@ -1,0 +1,22 @@
+# AI Municipal Vision Platform — multi-task registry
+tasks:
+  banner:
+    display_name: "Banner Detection & Illegal Likelihood"
+    class_config: configs/banner/classes.yaml
+    data_config: configs/banner/data.yaml
+    train_config: configs/banner/train.yaml
+    weights: weights/banner/yolo11s_best.pt
+    enabled: true
+  dumping:
+    display_name: "Illegal Dumping Detection"
+    class_config: configs/dumping/classes.yaml
+    enabled: false
+  road_damage:
+    display_name: "Road Damage Detection"
+    enabled: false
+  child_safety:
+    display_name: "Child Safety Detection"
+    enabled: false
+  elderly_safety:
+    display_name: "Elderly Safety Detection"
+    enabled: false

@@ -1,0 +1,14 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [127.43300, 37.28400] },
+      "properties": {
+        "name": "설봉초등학교 어린이보호구역",
+        "radius_m": 120,
+        "is_sample": true
+      }
+    }
+  ]
+}

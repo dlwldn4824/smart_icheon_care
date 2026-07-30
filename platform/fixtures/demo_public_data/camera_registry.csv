@@ -1,0 +1,4 @@
+camera_id,latitude,longitude,heading,admin_district,district,location_name,is_sample
+DEMO-CCTV-001,37.28400,127.43300,135,설봉동,설봉동,설봉초등학교 통학로,true
+CCTV-001,37.27950,127.44200,90,설봉동,설봉동,설봉공원 입구,true
+CCTV-005,37.28400,127.43300,135,설봉동,설봉동,설봉초등학교 통학로,true

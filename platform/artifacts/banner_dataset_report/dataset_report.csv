@@ -1,0 +1,4 @@
+split,images,boxes,empty_labels
+train,111945,194860,0
+val,31438,53281,0
+test,16617,27944,0

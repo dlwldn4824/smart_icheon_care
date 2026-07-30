@@ -1,0 +1,44 @@
+# Contest MVP train — balanced ~12k/2k/2k (filtered tiny boxes)
+# Prefer this over full 160k on Mac/MPS.
+model: yolo11s.pt
+data: datasets/banner_mvp_filtered/data.yaml
+epochs: 30
+imgsz: 640
+batch: 8
+device: mps
+workers: 2
+patience: 7
+optimizer: AdamW
+lr0: 0.001
+lrf: 0.01
+weight_decay: 0.0005
+cos_lr: true
+amp: true
+cache: false
+seed: 42
+deterministic: false
+close_mosaic: 5
+project: runs/banner
+name: yolo11s_mvp_filtered
+exist_ok: false
+weights_dir: weights/banner/mvp_filtered_30ep
+pretrained: true
+mosaic: 1.0
+mixup: 0.0
+copy_paste: 0.0
+hsv_h: 0.01
+hsv_s: 0.4
+hsv_v: 0.3
+degrees: 3.0
+translate: 0.08
+scale: 0.4
+shear: 0.0
+perspective: 0.0005
+flipud: 0.0
+fliplr: 0.5
+erasing: 0.2
+tracking:
+  min_hits: 3
+  max_age: 30
+  event_iou_threshold: 0.5
+  event_cooldown_seconds: 300

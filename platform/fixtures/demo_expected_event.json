@@ -1,0 +1,30 @@
+{
+  "event_id_prefix": "DEMO-CCTV-001-E",
+  "camera_id": "DEMO-CCTV-001",
+  "district": "설봉동",
+  "location_name": "설봉초등학교 통학로",
+  "latitude": 37.284,
+  "longitude": 127.433,
+  "min_risk_score": 80,
+  "expected_priority_in": ["High", "Critical"],
+  "expected_risk_breakdown_keys": [
+    "base",
+    "complaint_hotspot",
+    "school_zone",
+    "high_population",
+    "no_permission",
+    "far_from_legal_board"
+  ],
+  "expected_flags": {
+    "complaint_hotspot": true,
+    "school_zone": true,
+    "high_population": true,
+    "no_permission": true,
+    "far_from_legal_board": true
+  },
+  "expected_risk_score": 100.0,
+  "expected_priority": "Critical",
+  "expected_priority_reason_contains": ["허가", "학교", "민원"],
+  "expected_recommended_action": "24시간 이내 현장 확인 권장",
+  "initial_status": "DETECTED"
+}

@@ -1,0 +1,43 @@
+{
+  "weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+  "checks": {
+    "risk_priority": {
+      "risk_score": 100.0,
+      "priority": "Critical",
+      "ok": true
+    },
+    "workflow": {
+      "ok": true,
+      "status": "ASSIGNED"
+    },
+    "api_dashboard": {
+      "health": {
+        "status": "ok",
+        "version": "0.4.0"
+      },
+      "total_events": 3,
+      "ok": true
+    },
+    "demo": {
+      "video": {
+        "source_mode": "VIDEO",
+        "events": 0,
+        "priorities": {},
+        "seconds": 6.086468207999133
+      },
+      "fallback": {
+        "source_mode": "DEMO_FALLBACK",
+        "events": 3,
+        "priorities": {
+          "Critical": 3
+        },
+        "seconds": 1.0254851250210777,
+        "images": 3
+      }
+    },
+    "pytest": {
+      "returncode": 0,
+      "ok": true
+    }
+  }
+}

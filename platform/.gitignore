@@ -1,0 +1,45 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Training / inference run artifacts (regenerable)
+runs/
+events/
+artifacts/events.db
+artifacts/*.db
+artifacts/evaluation/
+artifacts/augmentation_preview/
+artifacts/experiment_comparison/
+artifacts/banner_dataset_report/previews/
+artifacts/final_model/_tmp_viz/
+artifacts/final_model/demo_runs/
+artifacts/verify_events_json/
+artifacts/*.log
+
+# Datasets (too large for git)
+datasets/raw/
+datasets/**/images/
+datasets/**/labels/
+datasets/banner/
+datasets/banner_mvp_all/
+datasets/banner_mvp_filtered/
+datasets/yolo/
+
+# Model binaries (store externally / release separately)
+weights/**/*.pt
+weights/**/*.onnx
+weights/**/*.engine
+yolo11s.pt
+yolo11n.pt
+*.pt
+*.onnx
+
+# Media
+*.mp4
+!samples/banner_test.mp4
+.DS_Store
+.env
+.env.*

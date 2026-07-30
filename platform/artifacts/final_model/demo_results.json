@@ -1,0 +1,17 @@
+{
+  "video": {
+    "source_mode": "VIDEO",
+    "events": 0,
+    "priorities": {},
+    "seconds": 3.4402917079860345
+  },
+  "fallback": {
+    "source_mode": "DEMO_FALLBACK",
+    "events": 3,
+    "priorities": {
+      "Critical": 3
+    },
+    "seconds": 1.4004637079779059,
+    "images": 3
+  }
+}

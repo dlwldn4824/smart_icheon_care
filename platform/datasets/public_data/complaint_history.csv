@@ -1,0 +1,5 @@
+location_id,latitude,longitude,count_90d,category,is_sample
+CMP-001,37.27950,127.44200,3,banner,true
+CMP-002,37.28400,127.43300,4,banner,true
+CMP-003,37.30500,127.50500,2,banner,true
+CMP-004,37.27900,127.44900,1,banner,true

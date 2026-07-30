@@ -1,0 +1,40 @@
+# 10-epoch A/B: balanced MVP, drop boxes with w<8px or h<8px
+# Note: a run started before weights_dir support still lands in
+# runs/banner/exp_mvp_filtered_10ep/ — compare script finds both.
+model: yolo11s.pt
+data: datasets/banner_mvp_filtered/data.yaml
+epochs: 10
+imgsz: 640
+batch: 8
+device: mps
+workers: 2
+patience: 7
+optimizer: AdamW
+lr0: 0.001
+lrf: 0.01
+weight_decay: 0.0005
+cos_lr: true
+amp: true
+cache: false
+seed: 42
+deterministic: false
+close_mosaic: 5
+project: runs/banner
+name: experiment_filtered
+exist_ok: false
+weights_dir: weights/banner/experiment_filtered
+pretrained: true
+mosaic: 1.0
+mixup: 0.0
+copy_paste: 0.0
+hsv_h: 0.01
+hsv_s: 0.4
+hsv_v: 0.3
+degrees: 3.0
+translate: 0.08
+scale: 0.4
+shear: 0.0
+perspective: 0.0005
+flipud: 0.0
+fliplr: 0.5
+erasing: 0.2

@@ -1,0 +1,29 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONPATH: /app
+      DATABASE_URL: postgresql+psycopg://vision:vision@db:5432/municipal_vision
+    volumes:
+      - ./weights:/app/weights
+      - ./datasets:/app/datasets
+      - ./runs:/app/runs
+    depends_on:
+      - db
+
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: vision
+      POSTGRES_PASSWORD: vision
+      POSTGRES_DB: municipal_vision
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/app/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+volumes:
+  pgdata:

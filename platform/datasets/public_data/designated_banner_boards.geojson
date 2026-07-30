@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [127.44300, 37.26600] },
+      "properties": {
+        "name": "이천역 광장 지정 게시대",
+        "board_id": "BOARD-중앙-01",
+        "radius_m": 25,
+        "is_sample": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "save_dir": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/runs/banner/experiment_all",
+  "best_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/experiment_all/best.pt",
+  "last_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/experiment_all/last.pt",
+  "imgsz": 640,
+  "device": "mps",
+  "dataset": {
+    "data_yaml": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all/data.yaml",
+    "root": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all",
+    "classes": [
+      "banner"
+    ],
+    "counts": {
+      "train": 11967,
+      "val": 1961
+    }
+  },
+  "note": "Metrics reflect this training run only; do not invent external benchmarks.",
+  "ultralytics_results": {
+    "metrics/precision(B)": 0.5603922912346434,
+    "metrics/recall(B)": 0.4929444967074318,
+    "metrics/mAP50(B)": 0.4694645173433551,
+    "metrics/mAP50-95(B)": 0.28020350021166157,
+    "fitness": 0.28020350021166157
+  }
+}

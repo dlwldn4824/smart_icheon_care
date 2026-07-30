@@ -1,0 +1,29 @@
+{
+  "save_dir": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/runs/banner/final_all_30ep",
+  "best_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+  "last_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/last.pt",
+  "results_csv": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/results.csv",
+  "imgsz": 640,
+  "device": "mps",
+  "model": "yolo11s.pt",
+  "epochs": 30,
+  "dataset": {
+    "data_yaml": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all/data.yaml",
+    "root": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all",
+    "classes": [
+      "banner"
+    ],
+    "counts": {
+      "train": 11967,
+      "val": 1961
+    }
+  },
+  "note": "Metrics reflect this training run only; do not invent external benchmarks.",
+  "ultralytics_results": {
+    "metrics/precision(B)": 0.5913577779417419,
+    "metrics/recall(B)": 0.5381920324811927,
+    "metrics/mAP50(B)": 0.5099413846885424,
+    "metrics/mAP50-95(B)": 0.3048686208540069,
+    "fitness": 0.3048686208540069
+  }
+}

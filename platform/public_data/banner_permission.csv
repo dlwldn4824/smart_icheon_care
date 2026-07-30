@@ -1,0 +1,3 @@
+permit_id,latitude,longitude,start_date,end_date,board_id,is_sample
+IC-SAMPLE-1102,37.26600,127.44300,2026-06-01,2026-07-15,BOARD-중앙-01,true
+IC-SAMPLE-0841,37.27900,127.44900,2026-05-01,2026-06-10,BOARD-NONE,true

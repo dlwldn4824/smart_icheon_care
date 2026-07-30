@@ -1,0 +1,4 @@
+location_id,latitude,longitude,count_3y,is_sample
+ACC-001,37.30500,127.50500,2,true
+ACC-002,37.28400,127.43300,1,true
+ACC-003,37.27950,127.44200,0,true

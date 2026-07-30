@@ -1,0 +1,14 @@
+# MVP: single class — legality is decided by RiskEngine, not by class name
+names:
+  0: banner
+
+# Future expansion (do not enable until data is ready)
+# names:
+#   0: banner
+#   1: banner_board
+#   2: pole
+#   3: tree
+#   4: fence
+#   5: guardrail
+#   6: traffic_sign
+#   7: building_sign

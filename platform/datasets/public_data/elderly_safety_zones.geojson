@@ -1,0 +1,14 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [127.44200, 37.27950] },
+      "properties": {
+        "name": "설봉공원 인근 노인보호구역(샘플)",
+        "radius_m": 80,
+        "is_sample": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+names:
+  0: banner
+path: /private/var/folders/ff/mrk8fkwn7tn0nmxmn_3lqxgw0000gn/T/pytest-of-LEEJIWOO/pytest-4/test_empty_dataset_raises_clea0/banner
+train: images/train
+val: images/val

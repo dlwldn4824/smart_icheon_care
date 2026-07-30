@@ -1,0 +1,105 @@
+{
+  "final_weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+  "train_metrics": {
+    "save_dir": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/runs/banner/final_all_30ep",
+    "best_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+    "last_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/last.pt",
+    "results_csv": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/results.csv",
+    "imgsz": 640,
+    "device": "mps",
+    "model": "yolo11s.pt",
+    "epochs": 30,
+    "dataset": {
+      "data_yaml": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all/data.yaml",
+      "root": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all",
+      "classes": [
+        "banner"
+      ],
+      "counts": {
+        "train": 11967,
+        "val": 1961
+      }
+    },
+    "note": "Metrics reflect this training run only; do not invent external benchmarks.",
+    "ultralytics_results": {
+      "metrics/precision(B)": 0.5913577779417419,
+      "metrics/recall(B)": 0.5381920324811927,
+      "metrics/mAP50(B)": 0.5099413846885424,
+      "metrics/mAP50-95(B)": 0.3048686208540069,
+      "fitness": 0.3048686208540069
+    }
+  },
+  "epoch30_common_test": {
+    "common_test_images": 1892,
+    "precision": 0.6329142711541369,
+    "recall": 0.5550646891763963,
+    "f1": 0.5914386953380578,
+    "map50": 0.43846124866365743,
+    "map50_95": 0.2785742079141935,
+    "infer_ms": 26.107302565070018,
+    "fps": 38.303459252735635,
+    "val_seconds": 123.17209908299264,
+    "weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+    "tiny_recall": 0.22023809523809523,
+    "tiny_precision": 0.357487922705314,
+    "tiny_map50": 0.007528630001413827,
+    "tp": 1745,
+    "fp": 1060,
+    "fn": 1424,
+    "avg_confidence": 0.5185784153228563,
+    "avg_infer_ms": 51.2485873550451,
+    "images_analyzed": 1892
+  },
+  "epoch10_baseline": {
+    "precision": 0.5937610776320453,
+    "recall": 0.5285579047017986,
+    "f1": 0.5592654424040067,
+    "map50": 0.4087610707038489,
+    "map50_95": 0.2602668692461144,
+    "infer_ms": 133.0016757247975,
+    "fps": 7.51870226108403,
+    "val_seconds": 334.6025406669942,
+    "tp": 1618,
+    "fp": 1029,
+    "fn": 1551,
+    "avg_confidence": 0.4883629082620121,
+    "tiny_recall": 0.19345238095238096
+  },
+  "speed": {
+    "mps": {
+      "latency_ms": 63.52053955197334,
+      "fps": 15.74293932408724,
+      "n": 20
+    },
+    "cpu": {
+      "latency_ms": 238.48668965074467,
+      "fps": 4.193106128750685,
+      "n": 20
+    }
+  },
+  "onnx": {
+    "ok": false,
+    "path": null,
+    "error": "No module named 'onnx'",
+    "test_ok": false
+  },
+  "demo": {
+    "video": {
+      "source_mode": "VIDEO",
+      "events": 0,
+      "priorities": {},
+      "seconds": 3.4402917079860345
+    },
+    "fallback": {
+      "source_mode": "DEMO_FALLBACK",
+      "events": 3,
+      "priorities": {
+        "Critical": 3
+      },
+      "seconds": 1.4004637079779059,
+      "images": 3
+    }
+  },
+  "release_dir": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/release",
+  "generated_at": "2026-07-29T01:06:29.114402+00:00"
+}
