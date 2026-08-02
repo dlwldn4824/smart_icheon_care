@@ -409,7 +409,7 @@ export function BannerPriorityQueue() {
         <CardHeader>
           <CardTitle>후보 상세 · Risk / Priority</CardTitle>
           <p className="mt-0.5 text-[11px] text-muted">
-            객체 탐지는 현수막 존재만 식별합니다. 합법·불법 확정은 공무원이 수행합니다.
+            1단계 Risk로 불법 의심을 표시합니다. 최종 합법·불법 확정은 공무원이 수행합니다.
           </p>
         </CardHeader>
         <CardContent>

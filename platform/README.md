@@ -1,10 +1,12 @@
 # AI Municipal Vision Platform
 
 지자체 CCTV + 공공데이터 기반 **도시 관리 CV 플랫폼**.  
-MVP Task는 현수막 탐지 후 **불법 가능성·행정 우선순위**를 제안하는 의사결정 지원 모듈입니다.
+MVP Task는 **불법 현수막(의심)** 의사결정 지원입니다.
 
-> CV 모델은 “불법”을 확정하지 않습니다.  
-> **현수막 존재·위치**를 탐지하고, 허가·GIS·민원 데이터로 **위험도(Risk)·우선순위(Priority)** 를 산정합니다.
+> YOLO는 “불법”을 픽셀로 확정하지 않습니다 (공개 illegal/legal 2클래스 데이터 부재).  
+> **1단계**: 현수막 존재 탐지 + 허가·GIS·민원 Risk → `불법의심`.  
+> **2단계**: 사용자가 박스를 클릭하면 OCR·키워드·마크 휴리스틱으로 내용 검사.  
+> **최종**: 공무원 `CONFIRMED`.
 
 ## Task Roadmap
 
@@ -20,7 +22,9 @@ MVP Task는 현수막 탐지 후 **불법 가능성·행정 우선순위**를 �
 
 ```text
 CCTV → Frame Sampling → YOLO Detection → ByteTrack
-  → Geo Mapping → 공공데이터 Join → Risk Score → Priority Score → Dashboard
+  → Geo Mapping → 공공데이터 Join → Risk/Priority → illegal_candidate
+  → (optional click) crop → OCR/content rules → content_verdict
+  → Dashboard → Officer CONFIRMED
 ```
 
 ## Quick Start
@@ -90,6 +94,7 @@ platform/
 ├── inference/         # FrameSampler + Pipeline
 ├── geospatial/        # GeoMapper + Join
 ├── risk/              # RiskEngine
+├── content/           # Stage-2 OCR/keyword/mark inspect (illegal_text, inspect)
 ├── priority/          # PriorityEngine
 ├── backend/           # FastAPI + PostGIS schema
 ├── datasets/          # YOLO layout (gitignored images)

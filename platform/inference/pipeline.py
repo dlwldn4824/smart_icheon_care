@@ -30,6 +30,16 @@ from utils.config import load_yaml
 from utils.paths import ensure_dir, resolve_path
 
 
+def _verdict_from_risk(risk_0_100: float) -> tuple[bool, str]:
+    try:
+        from content.inspect import verdict_from_risk
+
+        return verdict_from_risk(risk_0_100)
+    except Exception:
+        score = float(risk_0_100 or 0)
+        return (score >= 70), ("ILLEGAL_SUSPECT" if score >= 70 else "LOW_RISK")
+
+
 @dataclass
 class ScoredEvent:
     event: dict
@@ -75,6 +85,8 @@ def scored_to_store(s: ScoredEvent) -> dict:
         "recommended_action": s.priority.get("recommended_action"),
         "source_mode": s.source_mode,
         "history": s.event.get("history") or [],
+        "illegal_candidate": s.event.get("illegal_candidate"),
+        "verdict": s.event.get("verdict"),
     }
 
 
@@ -273,6 +285,7 @@ class MunicipalVisionPipeline:
             )
         )
         risk_0_100 = rule.score
+        illegal_candidate, verdict = _verdict_from_risk(risk_0_100)
         eid = evt.event_id
         if self.event_id_prefix:
             raw_suffix = evt.event_id.rsplit("-E", 1)[-1]
@@ -306,6 +319,8 @@ class MunicipalVisionPipeline:
             "risk_breakdown": rule.risk_breakdown,
             "confidence": round(evt.best_confidence, 4),
             "source_mode": self.source_mode,
+            "illegal_candidate": illegal_candidate,
+            "verdict": verdict,
             "assignee": None,
             "department": None,
             "review_note": None,

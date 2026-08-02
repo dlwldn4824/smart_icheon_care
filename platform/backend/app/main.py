@@ -216,11 +216,17 @@ def _build_inference_preview(
         bbox = ev.get("bbox_xyxy")
         if not bbox or len(bbox) != 4:
             continue
+        conf = float(ev.get("det_conf") or 0)
+        is_suspect = bool(ev.get("illegal_candidate")) or str(ev.get("verdict") or "") == "ILLEGAL_SUSPECT"
+        tag = "불법의심" if is_suspect else "현수막"
         boxes.append(
             {
                 "bbox_xyxy": [float(x) for x in bbox],
-                "label": f"{ev.get('class_name', 'banner')} {float(ev.get('det_conf') or 0):.2f}",
+                "label": f"{tag} {conf:.2f}",
                 "event_id": ev.get("event_id"),
+                "illegal_candidate": is_suspect,
+                "verdict": ev.get("verdict") or ("ILLEGAL_SUSPECT" if is_suspect else "LOW_RISK"),
+                "risk_score": ev.get("risk_score"),
             }
         )
     if not boxes:
@@ -240,14 +246,16 @@ def _build_inference_preview(
 
     for b in boxes:
         x1, y1, x2, y2 = map(int, b["bbox_xyxy"])
-        cv2.rectangle(vis, (x1, y1), (x2, y2), (0, 80, 255), 2)
+        suspect = bool(b.get("illegal_candidate"))
+        color = (0, 60, 220) if suspect else (40, 160, 40)
+        cv2.rectangle(vis, (x1, y1), (x2, y2), color, 2)
         cv2.putText(
             vis,
             str(b["label"]),
             (x1, max(18, y1 - 6)),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.55,
-            (0, 80, 255),
+            color,
             2,
             cv2.LINE_AA,
         )
@@ -310,6 +318,20 @@ def _flatten_event(item: dict[str, Any]) -> dict[str, Any]:
         "history": item.get("history") or ev.get("history") or [],
         "geo_notes": item.get("geo_notes") or [],
         "reasons": (pri.get("reasons") or []) + ((illegal.get("rule_score") or {}).get("reasons") or []),
+        "illegal_candidate": bool(
+            ev.get("illegal_candidate")
+            if ev.get("illegal_candidate") is not None
+            else item.get("illegal_candidate")
+            if item.get("illegal_candidate") is not None
+            else float(ev.get("risk_score") or item.get("risk_score") or 0) >= 70
+        ),
+        "verdict": ev.get("verdict")
+        or item.get("verdict")
+        or (
+            "ILLEGAL_SUSPECT"
+            if float(ev.get("risk_score") or item.get("risk_score") or 0) >= 70
+            else "LOW_RISK"
+        ),
         "raw": item,
     }
 
@@ -345,6 +367,7 @@ def list_events(
     assignee: str | None = None,
     sort: str = "risk_score",
     flat: bool = False,
+    illegal_only: bool = False,
 ) -> list[dict[str, Any]]:
     if status and normalize_status(status) not in VALID_STATUS and status not in VALID_STATUS:
         # allow query only for known statuses
@@ -357,6 +380,14 @@ def list_events(
         department=department,
         assignee=assignee,
     )
+    if illegal_only:
+        filtered: list[dict[str, Any]] = []
+        for r in rows:
+            ev = r.get("event") or {}
+            risk = float(ev.get("risk_score") or r.get("risk_score") or 0)
+            if ev.get("illegal_candidate") is True or ev.get("verdict") == "ILLEGAL_SUSPECT" or risk >= 70:
+                filtered.append(r)
+        rows = filtered
     rows_sorted = _sort_events(rows, sort)
     if flat:
         return [_flatten_event(r) for r in rows_sorted]
@@ -544,6 +575,98 @@ async def infer_video(
             "conf": conf,
             **preview,
         }
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
+def _permit_phrases_for_camera(camera_id: str) -> list[str]:
+    phrases: list[str] = []
+    try:
+        for p in repo._load_permits():  # noqa: SLF001 — shared fixture loader
+            phrases.append(str(p.get("permit_id") or ""))
+        cam = repo.get_camera(camera_id)
+        if cam is not None:
+            phrases.append(cam.location_name or "")
+            phrases.append(cam.admin_district or "")
+    except Exception:
+        pass
+    return [p for p in phrases if p]
+
+
+@app.post("/api/v1/inference/inspect")
+async def inspect_banner(
+    file: UploadFile = File(...),
+    bbox_xyxy: str = Form(...),
+    camera_id: str = Form("CCTV-001"),
+    event_id: str | None = Form(None),
+) -> dict[str, Any]:
+    """Stage-2: crop one banner box and run OCR + mark heuristics."""
+    import json as _json
+
+    import cv2
+    import numpy as np
+
+    from content.inspect import inspect_banner_crop
+
+    try:
+        bbox = _json.loads(bbox_xyxy)
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            raise ValueError("bbox must be [x1,y1,x2,y2]")
+        bbox_f = [float(x) for x in bbox]
+    except Exception as exc:
+        raise HTTPException(400, f"invalid bbox_xyxy JSON: {exc}") from exc
+
+    suffix = Path(file.filename or "upload.jpg").suffix or ".jpg"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(await file.read())
+        tmp_path = Path(tmp.name)
+    try:
+        image = cv2.imread(str(tmp_path))
+        if image is None:
+            # try decode via numpy
+            raw = tmp_path.read_bytes()
+            arr = np.frombuffer(raw, dtype=np.uint8)
+            image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        if image is None:
+            raise HTTPException(400, "could not decode image")
+
+        on_board = False
+        if event_id:
+            try:
+                item = store.get(event_id)
+                notes = " ".join(str(x) for x in (item.get("geo_notes") or []))
+                on_board = "지정" in notes or "게시대" in notes
+            except KeyError:
+                pass
+
+        result = inspect_banner_crop(
+            image,
+            bbox_f,
+            permit_phrases=_permit_phrases_for_camera(camera_id),
+            on_designated_board=on_board,
+        )
+        out = result.to_dict()
+        out["event_id"] = event_id
+        out["camera_id"] = camera_id
+        out["bbox_xyxy"] = bbox_f
+
+        # Persist content verdict onto event if known
+        if event_id:
+            try:
+                item = store.get(event_id)
+                ev = item.get("event") or {}
+                ev["content_verdict"] = result.content_verdict
+                ev["content_confidence"] = result.confidence
+                ev["ocr_text"] = result.ocr_text
+                ev["content_reasons"] = result.reasons
+                if result.content_verdict == "ILLEGAL_SUSPECT":
+                    ev["illegal_candidate"] = True
+                    ev["verdict"] = "ILLEGAL_SUSPECT"
+                item["event"] = ev
+                store.upsert(item)
+            except KeyError:
+                pass
+        return out
     finally:
         tmp_path.unlink(missing_ok=True)
 

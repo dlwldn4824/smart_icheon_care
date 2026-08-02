@@ -10,7 +10,7 @@
 ## 1. 한 줄 요약
 
 AI Hub 종합 민원 이미지의 **현수막(banner)** 객체를 탐지하는 **YOLO11s** 단클래스 검출기.  
-시정 CCTV/업로드 영상에서 현수막 **존재 여부**만 판정하며, 불법 여부는 공공데이터·규칙 엔진이 별도 산정한다.
+시정 CCTV/업로드 영상에서 현수막 **존재 여부**만 판정한다. **불법 픽셀 분류(옵션2)** 는 공개 illegal/legal YOLO 라벨이 없어 보류한다. 제품은 **옵션1**: 탐지 + 공공데이터 Risk → `불법의심`, 그리고 **클릭 시 2단계 OCR/마크 내용 검사**로 보완한다.
 
 ---
 
@@ -99,23 +99,28 @@ AI Hub 종합 민원 이미지의 **현수막(banner)** 객체를 탐지하는 *
 
 ```
 이미지·영상 업로드 (또는 향후 RTSP)
-  → YOLO banner detect (+ ByteTrack)
-  → Event (DETECTED)
-  → Geo join (CCTV 근사좌표·공공데이터)
-  → Risk / Priority (규칙 엔진, 0–100)
+  → YOLO banner detect (+ ByteTrack)          # 1단계: 존재
+  → Event (DETECTED) + Risk/Priority
+  → illegal_candidate / verdict
+      (Risk≥70 → ILLEGAL_SUSPECT, else LOW_RISK)
+  → (선택) 박스 클릭 → crop → OCR·키워드·마크 휴리스틱
+      → content_verdict: ILLEGAL_SUSPECT | LIKELY_LEGAL | NEEDS_REVIEW
   → 대시보드 검토
-  → DETECTED → REVIEW_PENDING → CONFIRMED → ASSIGNED → IN_PROGRESS → RESOLVED
+  → DETECTED → REVIEW_PENDING → CONFIRMED → … → RESOLVED
      (또는 DISMISSED)
 ```
 
-- CV는 **현수막 존재**만 주장한다.  
+- **1단계 CV**: 현수막 **존재** + 공공데이터 Risk 기반 `불법의심` 배지.  
+- **2단계 CV**: 클릭한 bbox만 OCR(easyocr)·금칙어/허가번호·도장 휴리스틱. 학습된 로고 분류기 아님(MVP).  
+- **옵션2 부재**: 공개 데이터에 illegal/legal 2클래스 YOLO 라벨 없음 → 재학습 보류.  
 - `CONFIRMED`는 공무원 확인 후에만 설정.  
 - 상태 전이는 단방향 상태 머신 (`platform/event/workflow.py`).
 
 ### 대시보드 UX
 
-- `/cctv`: 업로드 → 박스 미리보기(`preview_base64`) + 이벤트 카드 + 리스트 갱신  
-- API: `POST /api/v1/inference/image|video` (v0.4.1)
+- `/cctv`: **불법 현수막(의심) 탐지** — 업로드 → 박스 미리보기 + 클릭 시 내용 검사 패널  
+- API: `POST /api/v1/inference/image|video`, `POST /api/v1/inference/inspect`  
+- 이벤트 필터: `GET /api/v1/events?illegal_only=true`
 
 ---
 
@@ -125,7 +130,10 @@ AI Hub 종합 민원 이미지의 **현수막(banner)** 객체를 탐지하는 *
 - FP 소폭 증가(1029→1060) — 운영 시 conf 튜닝·사람 검토 필요  
 - 학습 데이터는 AI Hub 도메인; 이천 CCTV 실환경과 도메인 갭 가능  
 - 라이브 RTSP는 미연동 (업로드 MVP)  
-- `.pt` 가중치는 git에 없음 — 배포 시 `weights/banner/final_all_30ep/best.pt`를 별도 전달
+- `.pt` 가중치는 git에 없음 — 배포 시 `weights/banner/final_all_30ep/best.pt`를 별도 전달  
+- OCR은 각도·야간·저해상도에서 실패 → `NEEDS_REVIEW` (easyocr 미설치 시에도 동일)  
+- 마크/도장 탐지는 휴리스틱이며 이천 지정 마크 DB가 생기면 교체  
+- 금칙어 사전은 시드이며 법적 단속 기준 전체를 대체하지 않음
 
 ---
 
