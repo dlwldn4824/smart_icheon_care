@@ -157,8 +157,8 @@ flowchart TD
   detect --> event["Event DETECTED"]
   event --> join["GIS + 공공데이터 fixture"]
   join --> risk["Risk/Priority to ILLEGAL_SUSPECT or LOW_RISK"]
-  risk --> click["선택 bbox 클릭"]
-  click --> ocr["inspect OCR content_verdict"]
+  risk --> pick["선택 bbox 클릭"]
+  pick --> ocr["inspect OCR content_verdict"]
   risk --> dash["Next.js Dashboard"]
   ocr --> dash
   dash --> officer["Officer CONFIRMED to RESOLVED"]
