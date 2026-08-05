@@ -35,28 +35,28 @@ cd platform && PYTHONPATH=. uvicorn backend.app.main:app --host 127.0.0.1 --port
 
 ```mermaid
 flowchart LR
-  U[이미지·영상 업로드] --> Y[YOLO11s 현수막 존재]
-  Y --> B[ByteTrack]
-  B --> E[Event 생성]
-  E --> G[GIS · CCTV 근사좌표]
-  G --> P[공공데이터 Join]
-  P --> R[Risk / Priority]
-  R --> I[illegal_candidate<br/>의심 후보]
-  I --> C{박스 클릭?}
-  C -->|선택| O[OCR · 내용 검사]
-  C -->|스킵| D[Dashboard /cctv]
+  U["이미지/영상 업로드"] --> Y["YOLO11s 현수막 존재"]
+  Y --> B["ByteTrack"]
+  B --> E["Event 생성"]
+  E --> G["GIS CCTV 근사좌표"]
+  G --> P["공공데이터 Join"]
+  P --> R["Risk / Priority"]
+  R --> I["illegal_candidate 의심 후보"]
+  I --> C{"박스 클릭?"}
+  C -->|선택| O["OCR 내용 검사"]
+  C -->|스킵| D["Dashboard /cctv"]
   O --> D
-  D --> H[공무원 CONFIRMED]
+  D --> H["공무원 CONFIRMED"]
 ```
 
 ```mermaid
 flowchart LR
-  D1[DETECTED] --> R1[REVIEW_PENDING]
-  R1 --> C1[CONFIRMED]
-  C1 --> A1[ASSIGNED]
-  A1 --> P1[IN_PROGRESS]
-  P1 --> S1[RESOLVED]
-  R1 --> X[DISMISSED]
+  D1["DETECTED"] --> R1["REVIEW_PENDING"]
+  R1 --> C1["CONFIRMED"]
+  C1 --> A1["ASSIGNED"]
+  A1 --> P1["IN_PROGRESS"]
+  P1 --> S1["RESOLVED"]
+  R1 --> X["DISMISSED"]
   D1 --> X
 ```
 
@@ -153,15 +153,15 @@ VWorld 지도·주차 핫스팟·시설 우선순위·AI 추천이 한 화면에
 
 ```mermaid
 flowchart TD
-  upload[업로드 / 샘플 프레임] --> detect[YOLO11s + ByteTrack]
-  detect --> event[Event DETECTED]
-  event --> join[GIS + 공공데이터 fixture]
-  join --> risk[Risk / Priority → ILLEGAL_SUSPECT or LOW_RISK]
-  risk --> click[선택: bbox 클릭]
-  click --> ocr[inspect · OCR · content_verdict]
-  risk --> dash[Next.js Dashboard]
+  upload["업로드 / 샘플 프레임"] --> detect["YOLO11s + ByteTrack"]
+  detect --> event["Event DETECTED"]
+  event --> join["GIS + 공공데이터 fixture"]
+  join --> risk["Risk/Priority to ILLEGAL_SUSPECT or LOW_RISK"]
+  risk --> click["선택 bbox 클릭"]
+  click --> ocr["inspect OCR content_verdict"]
+  risk --> dash["Next.js Dashboard"]
   ocr --> dash
-  dash --> officer[Officer CONFIRMED → … → RESOLVED]
+  dash --> officer["Officer CONFIRMED to RESOLVED"]
 ```
 
 상단 [파이프라인](#파이프라인) Mermaid와 동일 흐름입니다.
