@@ -43,3 +43,4 @@ yolo11n.pt
 .DS_Store
 .env
 .env.*
+datasets/banner_mvp
