@@ -13,18 +13,18 @@ export default function CCTVPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs text-muted">대시보드 &gt; 불법 현수막(의심) 탐지</p>
+          <p className="text-xs text-muted">대시보드 &gt; 현수막 존재 · 불법 의심 후보</p>
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold">불법 현수막(의심) 탐지</h1>
+            <h1 className="text-lg font-bold">현수막 존재 탐지 · 불법 의심 후보</h1>
             <span className="flex items-center gap-1 text-[11px] font-medium text-green-600">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
-              실시간
+              업로드 MVP
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-xs text-muted">
-            YOLO로 현수막을 찾은 뒤 공공데이터 Risk로 불법 의심을 표시합니다. 박스를 클릭하면 해당
-            배너만 OCR·마크 검사합니다. 최종 확정(CONFIRMED)은 공무원만 가능합니다. 라이브 CCTV(RTSP)는
-            미연동입니다.
+            YOLO로 현수막 존재를 찾고, 공공데이터 fixture 기반 Risk로 불법 의심 후보를 표시합니다. 박스를
+            클릭하면 해당 배너만 OCR·마크 검사합니다. 최종 확정(CONFIRMED)은 공무원만 가능합니다. 라이브
+            CCTV(RTSP)는 미연동입니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5 text-xs">

@@ -1,5 +1,5 @@
 {
-  "weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+  "weights": "platform/weights/banner/final_all_30ep/best.pt",
   "checks": {
     "risk_priority": {
       "risk_score": 100.0,

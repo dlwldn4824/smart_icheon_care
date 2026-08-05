@@ -1,23 +1,33 @@
 # Smart Icheon Care
 
-CCTV 객체 탐지와 공공데이터를 이어, 넓은 행정구역을 제한된 인력으로 관리하는 도시 인프라 통합 관리 시스템입니다.
+CCTV 영상과 공공데이터 지표를 이어, 넓은 행정구역을 제한된 인력으로 관리하는 **도시관리 의사결정 지원** 프로토타입입니다.
 
-**제2회 파이썬 SW 활용 경진대회** · **2026 지능형 로봇 컨소시엄 창의융합캠프** · 광운대학교 정보융합학부 이지우
+| | |
+|---|---|
+| **기간** | 2026.07 (MVP · 경진대회 출품) |
+| **형태** | 개인 프로젝트 (1인) |
+| **역할** | 문제 정의·제품 설계, YOLO 학습·실험, Risk/Priority·상태 머신, FastAPI·Next.js 대시보드, 문서·발표 |
+| **수상** | 지능형 로봇 혁신융합대학사업단 경진대회 대상 |
+| **맥락** | 제2회 파이썬 SW 활용 경진대회 · 2026 지능형 로봇 컨소시엄 창의융합캠프 · 광운대 정보융합학부 이지우 |
 
 ![표지](docs/readme-assets/01-cover.jpg)
 
-본 프로토타입은 이천시 도시관리 자동화 데모입니다. CV는 현수막 **존재**를 찾고, 공공데이터 Risk로 **불법 의심**을 제안하며, 최종 확정(`CONFIRMED`)은 공무원만 합니다. AI Hub 학습 가중치(`.pt`)는 저장소에 포함하지 않습니다. 라이브 RTSP는 미연동이며, `/cctv` 업로드 추론으로 파이프라인을 시연합니다.
+**이 저장소가 증명하는 것:** AI가 대상을 탐지하는 데서 끝내지 않고, 위험도와 업무 우선순위로 바꾼 뒤 사람이 최종 판단하도록 만들었다는 점입니다.  
+(LLM이 도구를 고르는 “에이전트” 프로젝트가 아닙니다. **워크플로우·우선순위·HITL** 설계의 증거로 읽어 주세요.)
 
-설계 원칙은 하나입니다. **되돌릴 수 있는 곳(탐지·선별·설명)엔 AI를, 되돌릴 수 없는 곳(승인·철거 확정)엔 사람(Human-in-the-loop)을.**
+CV는 현수막 **존재**만 찾고, 공공데이터 기반 Risk로 **불법 의심 후보**를 제안하며, 최종 확정(`CONFIRMED`)은 공무원만 합니다. 라이브 RTSP는 미연동이며 `/cctv` **이미지·영상 업로드 MVP**로 파이프라인을 시연합니다. 공공데이터는 시 공개 CSV·데모 fixture를 결합하는 **구조**이며, 운영 DB 전체 연동은 아닙니다. AI Hub 학습 가중치(`.pt`)는 저장소에 포함하지 않습니다.
+
+설계 원칙: **되돌릴 수 있는 곳(탐지·선별·설명)엔 AI를, 되돌릴 수 없는 곳(승인·철거 확정)엔 사람(Human-in-the-loop)을.**
 
 ```bash
-npm install && npm run dev          # 웹 → http://localhost:3000
-# 별도 터미널 (CV API)
+cp .env.example .env.local   # VWorld 키 선택 (없으면 데모 타일)
+npm install && npm run dev   # http://localhost:3000
+# 별도 터미널
 cd platform && PYTHONPATH=. uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
 
-먼저 보실 것 — `/cctv`에서 이미지 탐지 → 박스 클릭(2차 OCR 검사) → 이벤트 상태 `CONFIRMED`.  
-모델·실험 정본: [`platform/artifacts/BANNER_MODEL_CARD.md`](platform/artifacts/BANNER_MODEL_CARD.md)
+먼저 보실 것 — `/cctv`에서 업로드 탐지 → 박스 클릭(2차 OCR 검사) → `CONFIRMED`.  
+모델 정본: [`platform/artifacts/BANNER_MODEL_CARD.md`](platform/artifacts/BANNER_MODEL_CARD.md)
 
 ---
 
@@ -29,10 +39,10 @@ cd platform && PYTHONPATH=. uvicorn backend.app.main:app --host 127.0.0.1 --port
 
 | 기존 | Smart Icheon Care |
 |------|-------------------|
-| 민원 후 대응 | AI가 먼저 탐지·식별 |
+| 민원 후 대응 | 업로드 영상에서 AI가 먼저 후보 탐지 |
 | 전수 순찰 | Risk·Priority 기반 선별 |
-| 경험 기반 판단 | 공공데이터·정본 대조 |
-| 수작업 기록 | 이벤트 자동 기록·상태 머신 |
+| 경험 기반 판단 | 공공데이터 지표·판단 근거 문구 |
+| 수작업 기록 | 이벤트 자동 기록·단방향 상태 머신 |
 | 사후 대응 | 선제 후보 제시 → 사람 확정 |
 
 ---
@@ -47,7 +57,7 @@ cd platform && PYTHONPATH=. uvicorn backend.app.main:app --host 127.0.0.1 --port
 
 ![행정구역·인력 격차](docs/readme-assets/07-why-icheon-scale.jpg)
 
-대표 Persona(이천시 공무원)가 필요로 하는 것은 실시간 현장 파악, 민원 한눈에 보기, 체계적 의사결정 지원 — 그 결과가 **실질적 집행**입니다.
+대표 Persona(이천시 공무원)가 필요로 하는 것은 현장 상황 파악, 민원 한눈에 보기, 체계적 의사결정 지원 — 그 결과가 **실질적 집행**입니다.
 
 ---
 
@@ -55,9 +65,11 @@ cd platform && PYTHONPATH=. uvicorn backend.app.main:app --host 127.0.0.1 --port
 
 | | 뜻 |
 |---|---|
-| **모델 · 공통테스트** | Precision **0.633** · Recall **0.555** · mAP50 **0.439** (30ep, 10ep 대비 전 지표 상승) |
-| **속도** | Apple Silicon MPS ≈ **15.7 FPS** (≈64 ms) · CPU ≈ 4.2 FPS |
-| **행정 원칙** | 탐지≠확정. Risk≥70 → `불법의심`, 최종은 공무원 `CONFIRMED` |
+| **모델 · 공통테스트 1,892장** | Precision **0.633** · Recall **0.555** · mAP50 **0.439** (30ep; 10ep 대비 F1 +3.22%p) |
+| **속도 (공식 벤치)** | MPS ≈ **15.7 FPS** (≈63.5 ms/장, n=20) · CPU ≈ **4.2 FPS** — [`speed_benchmark.json`](platform/artifacts/final_model/speed_benchmark.json) |
+| **행정 원칙** | 탐지≠확정. Risk≥70 → `불법의심` 후보, 최종은 공무원 `CONFIRMED` |
+
+> 비교표에 나오는 Ultralytics eval loop FPS(예: 38.3)는 **공통테스트 평가 루프 타이밍**이라 공식 벤치(위 15.7)와 조건이 다릅니다. 포트폴리오·이력서에는 **speed_benchmark** 수치만 사용하세요.
 
 ![모델 성능](docs/readme-assets/20-model-metrics.jpg)
 
@@ -77,7 +89,7 @@ cd platform && PYTHONPATH=. uvicorn backend.app.main:app --host 127.0.0.1 --port
 
 ### 2막 — Risk가 줄 세운다
 
-탐지 결과는 CCTV 근사좌표·허가·민원·보호구역 등과 Join되어 Risk/Priority가 붙고, `ILLEGAL_SUSPECT` / `LOW_RISK`로 표시됩니다.
+탐지 결과는 CCTV 근사좌표와 공공데이터 fixture(허가·민원·보호구역 등)와 Join되어 Risk/Priority가 붙고, `ILLEGAL_SUSPECT` / `LOW_RISK` 후보로 표시됩니다.
 
 ![공공데이터 융합](docs/readme-assets/15-cv-public-fusion.jpg)
 
@@ -135,7 +147,7 @@ AI Hub 종합 민원 이미지 현수막 카테고리 → YOLO 포맷 정제 →
 
 ## 공공데이터 근거
 
-Risk·지도 레이어는 공개 표준·시 제공 CSV를 JSON으로 정규화합니다.
+Risk·지도 레이어는 **공개 표준·시 제공 CSV**와 데모 fixture를 JSON으로 정규화하는 **결합 구조**입니다 (운영 DB 전체 연동이 아님).
 
 - 어린이·노인·장애인 보호구역 → `facilityType`, `lat`/`lng`, 반경 ≈ `roadWidth × 15m`
 - 전국 주차장·도시공원 표준 → 이천시 필터 (`name`, `spaces`, `area` 등)
@@ -171,7 +183,7 @@ npm run dev                  # http://localhost:3000
 |------|------|
 | `/dashboard` | GIS 지도, AI 리스크, 시설 테이블 |
 | `/parking-analysis` | 주차 갈등 히트맵·핫스팟 |
-| `/cctv` | 불법 현수막(의심) 탐지 · 클릭 OCR · 우선순위 큐 |
+| `/cctv` | 현수막 존재 탐지 · 불법 의심 후보 · 클릭 OCR · 우선순위 큐 |
 | `/mobile` | 시민 신고·민원 |
 
 ### CV API (`platform/`)
@@ -254,4 +266,4 @@ FAQ(발표): 기존 CCTV·민원 미디어를 활용하고, 새 업무를 만들
 
 - **Web**: Next.js 16 · React 19 · TypeScript · Tailwind · Leaflet + VWorld · Recharts  
 - **CV**: Ultralytics YOLO11s · ByteTrack · FastAPI · (optional) easyocr  
-- **Data**: 공공데이터 CSV → JSON · Risk/Priority 규칙 엔진
+- **Data**: 공개 CSV·데모 fixture → JSON · Risk/Priority 규칙 엔진

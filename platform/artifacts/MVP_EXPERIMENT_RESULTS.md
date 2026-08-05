@@ -1,7 +1,11 @@
 # Banner MVP 실험 결과 정리
 
-작성 시점: 2026-07-27  
+작성 시점: 2026-07-27 (10ep A/B 기록)  
 목적: `filtered` vs `all` 10 epoch A/B 실험 기록 (공모전 MVP 선정용)
+
+> **후속**: 최종 배포 모델은 **30ep `banner_mvp_all`** 입니다.  
+> 대외 인용 수치 → `artifacts/BANNER_MODEL_CARD.md` · `artifacts/final_model/comparison.md`  
+> (본 문서의 “진행 중” 절은 당시 스냅샷이며, 10ep A/B는 완료됨.)
 
 > **주의**: 아래 val 수치는 **각 실험의 자체 val split** 기준입니다.  
 > 최종 모델 선정은 두 실험이 모두 끝난 뒤 **공통 test intersection**으로  

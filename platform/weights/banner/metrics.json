@@ -1,12 +1,12 @@
 {
-  "save_dir": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/runs/banner/exp_mvp_filtered_10ep",
-  "best_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/best.pt",
-  "last_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/last.pt",
+  "save_dir": "platform/runs/banner/exp_mvp_filtered_10ep",
+  "best_pt": "platform/weights/banner/best.pt",
+  "last_pt": "platform/weights/banner/last.pt",
   "imgsz": 640,
   "device": "mps",
   "dataset": {
-    "data_yaml": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_filtered/data.yaml",
-    "root": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_filtered",
+    "data_yaml": "platform/datasets/banner_mvp_filtered/data.yaml",
+    "root": "platform/datasets/banner_mvp_filtered",
     "classes": [
       "banner"
     ],

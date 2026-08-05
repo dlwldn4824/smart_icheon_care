@@ -24,7 +24,7 @@
     "infer_ms": 26.107302565070018,
     "fps": 38.303459252735635,
     "val_seconds": 123.17209908299264,
-    "weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
+    "weights": "platform/weights/banner/final_all_30ep/best.pt",
     "tiny_recall": 0.22023809523809523,
     "tiny_precision": 0.357487922705314,
     "tiny_map50": 0.007528630001413827,

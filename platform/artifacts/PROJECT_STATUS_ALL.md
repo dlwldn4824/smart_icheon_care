@@ -1,7 +1,8 @@
 # Smart Icheon Care — 프로젝트 전체 현황 통합본
 
-- 작성 시각: **2026-07-28 02:25 KST**
-- 원칙: **실제로 측정·실행된 결과만** 기록. 미완료 항목은 추측 수치 없음.
+- 최초 작성: **2026-07-28 02:25 KST** (30ep 학습 중 스냅샷)
+- **최종 갱신: 2026-07-29** — 30ep 학습·공통테스트·finalize·verify 완료
+- 원칙: **실제로 측정·실행된 결과만** 기록.
 - 위치: `platform/artifacts/PROJECT_STATUS_ALL.md`
 
 ---
@@ -11,10 +12,15 @@
 | 영역 | 상태 |
 |------|------|
 | 도시관리 MVP 파이프라인 (YOLO→ByteTrack→Event→Risk→Dashboard→Workflow) | **구현·동작 완료** |
-| A/B 10epoch (`filtered` vs `all`) | **완료** · 공통 test 1892장 평가 완료 |
+| A/B 10epoch (`filtered` vs `all`) | **완료** · 공통 test 1,892장 |
 | 최종 선정 | **`all` (`banner_mvp_all`)** |
-| 최종 30epoch 학습 | **진행 중** · **4/30 epoch 완료** · 약 **26시간** 남음 |
-| 배포 패키지 / ONNX / 10vs30 최종 비교 | **대기** (30epoch 종료 후 자동 체인) |
+| 최종 30epoch 학습 | **완료** · `weights/banner/final_all_30ep/best.pt` |
+| 공통테스트 30ep | P **0.633** · R **0.555** · mAP50 **0.439** · TinyR **0.220** |
+| 속도 벤치 (공식) | MPS **~15.7 FPS** · CPU **~4.2 FPS** (`final_model/speed_benchmark.json`) |
+| 배포 패키지 | `weights/banner/release/` · ONNX는 `onnx` 미설치로 실패 |
+| 문서 정본 | `artifacts/BANNER_MODEL_CARD.md` · `artifacts/final_release_report.md` |
+
+> §6 아래의 “4/30 진행 중” 표는 **학습 당시 스냅샷**으로 남겨 두었습니다. 현재 상태는 위 요약표를 따르세요.
 
 ---
 
@@ -193,25 +199,26 @@ base 30
 
 ---
 
-## 6. 최종 30 epoch 학습 — 진행 중 (작성 시점)
+## 6. 최종 30 epoch 학습 — 완료 (이력: 학습 중 스냅샷)
+
+### 6.1 최종 결과 (2026-07-29)
 
 | 항목 | 값 |
 |------|-----|
-| 상태 | **RUNNING** |
-| 설정 | `configs/banner/train_all_30ep.yaml` |
-| 데이터 | `banner_mvp_all` |
-| 초기 가중치 | **`yolo11s.pt` fresh** (10ep best resume 아님) |
+| 상태 | **COMPLETED** |
+| 가중치 | `weights/banner/final_all_30ep/best.pt` |
+| 공통테스트 1,892장 | P 0.633 · R 0.555 · F1 0.591 · mAP50 0.439 · TinyR 0.220 |
+| vs 10ep all | F1 +3.22%p · mAP50 +2.97%p · FN 1551→1424 |
+| 공식 속도 | MPS ~15.7 FPS · CPU ~4.2 FPS (`artifacts/final_model/speed_benchmark.json`) |
+| 리포트 | `artifacts/final_release_report.md` · `artifacts/final_model/comparison.md` |
+
+### 6.2 학습 중 스냅샷 (2026-07-28 작성 — 참고용)
+
+| 항목 | 값 |
+|------|-----|
+| 당시 상태 | RUNNING · **4 / 30 epoch** |
+| 설정 | `configs/banner/train_all_30ep.yaml` · `banner_mvp_all` · fresh `yolo11s.pt` |
 | device / imgsz / batch | MPS / 640 / 8 |
-| epochs | 30 · patience 10 |
-| 시작 | 2026-07-27 22:08경 |
-| 작성 시점 진행 | **4 / 30 epoch 완료** · Epoch 5 진행 추정 |
-| 경과 | 약 **4.0시간** (results.csv 누적 14426s ≈ 4.01h) |
-| 평균 | **약 1.0시간 / epoch** |
-| 남은 예상 | **약 26시간** → 대략 **2026-07-29 새벽 ~04:30** |
-| 로그 | `artifacts/train_all_30ep.log` |
-| run | `runs/banner/final_all_30ep/` |
-| 중간 weights | `runs/banner/final_all_30ep/weights/best.pt`, `last.pt` |
-| 최종 export (종료 시) | `weights/banner/final_all_30ep/{best,last,metrics,results}` |
 
 ### Val 추이 (학습 중 자체 val — 최종 발표용 아님)
 

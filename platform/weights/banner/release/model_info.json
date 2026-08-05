@@ -12,6 +12,6 @@
   "map50_95": 0.2785742079141935,
   "f1": 0.5914386953380578,
   "tiny_recall": 0.22023809523809523,
-  "weights": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/release/best.pt",
+  "weights": "platform/weights/banner/release/best.pt",
   "date": "2026-07-29"
 }

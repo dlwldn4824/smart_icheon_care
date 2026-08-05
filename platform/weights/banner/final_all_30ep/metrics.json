@@ -1,15 +1,15 @@
 {
-  "save_dir": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/runs/banner/final_all_30ep",
-  "best_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/best.pt",
-  "last_pt": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/last.pt",
-  "results_csv": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/weights/banner/final_all_30ep/results.csv",
+  "save_dir": "platform/runs/banner/final_all_30ep",
+  "best_pt": "platform/weights/banner/final_all_30ep/best.pt",
+  "last_pt": "platform/weights/banner/final_all_30ep/last.pt",
+  "results_csv": "platform/weights/banner/final_all_30ep/results.csv",
   "imgsz": 640,
   "device": "mps",
   "model": "yolo11s.pt",
   "epochs": 30,
   "dataset": {
-    "data_yaml": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all/data.yaml",
-    "root": "/Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_mvp_all",
+    "data_yaml": "platform/datasets/banner_mvp_all/data.yaml",
+    "root": "platform/datasets/banner_mvp_all",
     "classes": [
       "banner"
     ],

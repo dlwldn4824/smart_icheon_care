@@ -12,7 +12,7 @@ MVP Task는 **불법 현수막(의심)** 의사결정 지원입니다.
 
 | Task | 모듈 | 상태 |
 |------|------|------|
-| Task 1 | Illegal Banner (현수막 탐지·불법 가능성) | MVP |
+| Task 1 | Banner presence + illegal-suspect (Risk/HITL) | MVP |
 | Task 2 | Illegal Dumping | Planned |
 | Task 3 | Road Damage / Pothole | Planned |
 | Task 4 | Child Safety Zone Risk | Planned |
@@ -77,7 +77,7 @@ docker compose up --build
 
 ## 권장 모델 (MVP)
 
-**YOLO11s** — 실시간성·안정성·지자체 GPU/노트북 환경 균형.  
+**YOLO11s** — 업로드/샘플링 추론·안정성·지자체 노트북(MPS/CPU) 환경 균형. 공식 속도: MPS ~15.7 FPS.  
 근거: [MODEL_SELECTION.md](docs/MODEL_SELECTION.md)
 
 > Ultralytics는 YOLO12를 프로덕션에 비권장(학습 불안정·CPU 저하).  

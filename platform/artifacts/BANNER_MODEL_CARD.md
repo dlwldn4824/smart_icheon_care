@@ -75,14 +75,16 @@ AI Hub 종합 민원 이미지의 **현수막(banner)** 객체를 탐지하는 *
 
 출처: `artifacts/final_release_report.md`, `artifacts/final_model/comparison.md`
 
-### 4.3 추론 속도 (벤치마크)
+### 4.3 추론 속도 (공식 벤치마크)
+
+전용 스크립트, 단일 이미지 반복 **n=20** (`artifacts/final_model/speed_benchmark.json`).
 
 | Device | Latency | FPS |
 |--------|--------:|----:|
 | MPS | ~63.5 ms | ~15.7 |
 | CPU | ~238.5 ms | ~4.2 |
 
-출처: `artifacts/final_model/speed_benchmark.json`
+> `comparison.md`의 eval-loop FPS(예: 38.3)는 Ultralytics 공통테스트 평가 타이밍으로, **조건이 다릅니다.** 대외 인용은 위 표만 사용합니다.
 
 ---
 
@@ -118,9 +120,10 @@ AI Hub 종합 민원 이미지의 **현수막(banner)** 객체를 탐지하는 *
 
 ### 대시보드 UX
 
-- `/cctv`: **불법 현수막(의심) 탐지** — 업로드 → 박스 미리보기 + 클릭 시 내용 검사 패널  
+- `/cctv`: **현수막 존재 탐지 + 불법 의심 후보** — 업로드 MVP → 박스 미리보기 + 클릭 시 내용 검사  
 - API: `POST /api/v1/inference/image|video`, `POST /api/v1/inference/inspect`  
-- 이벤트 필터: `GET /api/v1/events?illegal_only=true`
+- 이벤트 필터: `GET /api/v1/events?illegal_only=true`  
+- 입력: **이미지·영상 업로드** (라이브 RTSP 미연동). 공공데이터는 fixture·공개 CSV 결합 구조.
 
 ---
 

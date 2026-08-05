@@ -1,4 +1,4 @@
-path: /Users/LEEJIWOO/Desktop/대학교폴더/대외활동/smart-icheon-care/platform/datasets/banner_smoke
+path: platform/datasets/banner_smoke
 train: images/train
 val: images/val
 test: images/test
