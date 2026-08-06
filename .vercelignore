@@ -1,0 +1,13 @@
+# Keep Vercel CLI uploads under the 10MB body limit
+platform/weights
+platform/datasets
+platform/runs
+platform/artifacts
+platform/.venv
+platform/events
+**/*.pt
+**/*.onnx
+**/*.mp4
+**/node_modules
+.next
+.git
