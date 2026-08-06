@@ -11,6 +11,10 @@ import {
   type InferenceResult,
   type InspectResult,
 } from "@/lib/vision-api";
+import {
+  fetchAIBannerReview,
+  type AIBannerReviewResult,
+} from "@/lib/ai-api";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -28,6 +32,10 @@ const CAMERAS = [
 
 const API_BASE = process.env.NEXT_PUBLIC_VISION_API_URL ?? "http://127.0.0.1:8000";
 
+/** 발표용 고정 데모 사진 (public/demo/banner-demo.png) */
+const DEMO_IMAGE_URL = "/demo/banner-demo.png";
+const DEMO_IMAGE_NAME = "banner-demo.png";
+
 function verdictBadge(v: string | undefined): "urgent" | "high" | "medium" | "low" | "outline" {
   if (v === "ILLEGAL_SUSPECT") return "urgent";
   if (v === "LIKELY_LEGAL") return "low";
@@ -37,7 +45,7 @@ function verdictBadge(v: string | undefined): "urgent" | "high" | "medium" | "lo
 }
 
 function verdictLabel(v: string | undefined): string {
-  if (v === "ILLEGAL_SUSPECT") return "불법 의심";
+  if (v === "ILLEGAL_SUSPECT") return "의심 후보";
   if (v === "LIKELY_LEGAL") return "합법 추정";
   if (v === "NEEDS_REVIEW") return "추가 검토";
   if (v === "LOW_RISK") return "저위험";
@@ -50,6 +58,7 @@ export function BannerInferenceUpload() {
   const videoRef = useRef<HTMLInputElement>(null);
   const lastFileRef = useRef<File | null>(null);
   const imgNaturalRef = useRef<{ w: number; h: number }>({ w: 1, h: 1 });
+  const [imgNatural, setImgNatural] = useState({ w: 1, h: 1 });
   const [cameraId, setCameraId] = useState("CCTV-001");
   const [conf, setConf] = useState(0.25);
   const [busy, setBusy] = useState<"image" | "video" | "inspect" | null>(null);
@@ -59,6 +68,8 @@ export function BannerInferenceUpload() {
   const [selectedBoxIdx, setSelectedBoxIdx] = useState<number | null>(null);
   const [inspect, setInspect] = useState<InspectResult | null>(null);
   const [illegalOnly, setIllegalOnly] = useState(false);
+  const [aiReview, setAiReview] = useState<AIBannerReviewResult | null>(null);
+  const [aiReviewBusy, setAiReviewBusy] = useState(false);
 
   function previewSrc(r: InferenceResult | null): string | null {
     if (r?.preview_base64) return r.preview_base64;
@@ -94,11 +105,71 @@ export function BannerInferenceUpload() {
     }
   }
 
+  async function runDemoImage() {
+    try {
+      const res = await fetch(DEMO_IMAGE_URL);
+      if (!res.ok) throw new Error(`데모 이미지를 불러올 수 없습니다 (${res.status})`);
+      const blob = await res.blob();
+      const type = blob.type || "image/jpeg";
+      const file = new File([blob], DEMO_IMAGE_NAME, { type });
+      await runImage(file);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "데모 이미지 로드 실패";
+      setError(message);
+      toast(message, "warning");
+    }
+  }
+
+  async function requestAiReview(data: InferenceResult) {
+    const image = data.preview_base64;
+    if (!image) return;
+    setAiReviewBusy(true);
+    setAiReview(null);
+    try {
+      const mediaType = image.startsWith("data:image/png")
+        ? "image/png"
+        : image.startsWith("data:image/webp")
+          ? "image/webp"
+          : "image/jpeg";
+      const review = await fetchAIBannerReview({
+        imageBase64: image,
+        mediaType,
+        detectionSummary: {
+          count: data.count,
+          camera_id: data.camera_id ?? cameraId,
+          conf: data.conf ?? conf,
+          boxes: (data.boxes ?? []).slice(0, 20).map((b) => ({
+            label: b.label,
+            illegal_candidate: b.illegal_candidate,
+            verdict: b.verdict,
+            risk_score: b.risk_score,
+            bbox_xyxy: b.bbox_xyxy,
+          })),
+          events: (data.events ?? []).slice(0, 12).map((ev) => ({
+            event_id: ev.event.event_id,
+            verdict: ev.event.verdict,
+            illegal_candidate: ev.event.illegal_candidate,
+            risk_score: ev.event.risk_score,
+            det_conf: ev.event.det_conf,
+            priority: ev.priority.level,
+          })),
+        },
+      });
+      setAiReview(review);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Claude 보조 분석 실패";
+      toast(message, "warning");
+    } finally {
+      setAiReviewBusy(false);
+    }
+  }
+
   async function runImage(file: File) {
     setBusy("image");
     setError(null);
     setResult(null);
     setInspect(null);
+    setAiReview(null);
     setSelectedBoxIdx(null);
     lastFileRef.current = file;
     setLocalPreview((prev) => {
@@ -113,16 +184,18 @@ export function BannerInferenceUpload() {
       ).length;
       const msg =
         data.count > 0
-          ? `불법 현수막(의심) 탐지 · ${data.count}건 (의심 ${suspects})`
+          ? `현수막 존재 탐지 · ${data.count}건 (의심 후보 ${suspects})`
           : "탐지된 현수막이 없습니다 (박스가 없으면 conf를 낮춰보세요)";
       toast(msg, data.count > 0 ? "success" : "info");
       notifyVisionEventsUpdated();
+      setBusy(null);
+      void requestAiReview(data);
     } catch (e) {
       const message = e instanceof VisionApiError ? e.message : "이미지 추론 실패";
       setError(message);
       toast(message, "warning");
-    } finally {
       setBusy(null);
+    } finally {
       if (imageRef.current) imageRef.current.value = "";
     }
   }
@@ -132,6 +205,7 @@ export function BannerInferenceUpload() {
     setError(null);
     setResult(null);
     setInspect(null);
+    setAiReview(null);
     setSelectedBoxIdx(null);
     lastFileRef.current = file;
     setLocalPreview(null);
@@ -144,12 +218,14 @@ export function BannerInferenceUpload() {
           : "탐지된 현수막이 없습니다";
       toast(msg, data.count > 0 ? "success" : "info");
       notifyVisionEventsUpdated();
+      setBusy(null);
+      void requestAiReview(data);
     } catch (e) {
       const message = e instanceof VisionApiError ? e.message : "영상 추론 실패";
       setError(message);
       toast(message, "warning");
-    } finally {
       setBusy(null);
+    } finally {
       if (videoRef.current) videoRef.current.value = "";
     }
   }
@@ -169,13 +245,12 @@ export function BannerInferenceUpload() {
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2">
         <div>
-          <CardTitle>불법 현수막(의심) 탐지</CardTitle>
+          <CardTitle>현수막 존재 탐지 · 불법 의심 후보</CardTitle>
           <p className="mt-0.5 text-[11px] text-muted">
-            1단계: YOLO 현수막 탐지 + 공공데이터 Risk. 2단계: 박스를 클릭하면 해당 배너 OCR·마크
-            검사. 최종 확정은 공무원 CONFIRMED.
+            YOLO 탐지 후 Claude가 불법 의심·놓친 현수막을 보조 점검합니다. 박스 클릭 시 OCR.
+            확정은 공무원 CONFIRMED.
           </p>
         </div>
-        <Badge variant="outline">POST /api/v1/inference/*</Badge>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap items-end gap-3">
@@ -213,7 +288,7 @@ export function BannerInferenceUpload() {
               checked={illegalOnly}
               onChange={(e) => setIllegalOnly(e.target.checked)}
             />
-            불법 의심만
+            의심 후보만
           </label>
           <input
             ref={imageRef}
@@ -235,13 +310,21 @@ export function BannerInferenceUpload() {
               if (f) void runVideo(f);
             }}
           />
-          <Button size="sm" disabled={busy !== null} onClick={() => imageRef.current?.click()}>
+          <Button size="sm" disabled={busy !== null} onClick={() => void runDemoImage()}>
             {busy === "image" ? (
               <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
             ) : (
               <ImagePlus className="mr-1 h-3.5 w-3.5" />
             )}
             이미지 탐지
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy !== null}
+            onClick={() => imageRef.current?.click()}
+          >
+            다른 이미지
           </Button>
           <Button
             size="sm"
@@ -263,6 +346,11 @@ export function BannerInferenceUpload() {
             {busy === "inspect" ? "선택한 배너 내용 검사 중…" : "추론 중… 박스 미리보기가 곧 표시됩니다."}
           </p>
         )}
+        {aiReviewBusy && (
+          <p className="text-[11px] text-sky-700">
+            Claude가 불법 의심·놓친 현수막을 보조 분석 중…
+          </p>
+        )}
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
             {error}
@@ -270,72 +358,77 @@ export function BannerInferenceUpload() {
         )}
 
         {(img || result) && (
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
-            <div className="relative overflow-hidden rounded-lg border border-border bg-slate-950 lg:col-span-7">
-              {img ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={img}
-                  alt="탐지 결과 미리보기"
-                  className="max-h-[420px] w-full object-contain"
-                  onLoad={(e) => {
-                    const el = e.currentTarget;
-                    imgNaturalRef.current = {
-                      w: el.naturalWidth || 1,
-                      h: el.naturalHeight || 1,
-                    };
-                  }}
-                />
-              ) : (
-                <div className="flex h-48 items-center justify-center text-xs text-slate-400">
-                  미리보기 준비 중…
-                </div>
-              )}
-              {/* Clickable box overlays in percent of displayed image box */}
-              {img && boxes.length > 0 && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="relative max-h-[420px] w-full" style={{ aspectRatio: `${imgNaturalRef.current.w} / ${imgNaturalRef.current.h}` }}>
-                    {boxes.map((b, i) => {
-                      const [x1, y1, x2, y2] = b.bbox_xyxy;
-                      const nw = imgNaturalRef.current.w;
-                      const nh = imgNaturalRef.current.h;
-                      const left = (x1 / nw) * 100;
-                      const top = (y1 / nh) * 100;
-                      const width = ((x2 - x1) / nw) * 100;
-                      const height = ((y2 - y1) / nh) * 100;
-                      const suspect = Boolean(b.illegal_candidate);
-                      return (
-                        <button
-                          key={`${b.event_id ?? i}-${i}`}
-                          type="button"
-                          title={`${b.label} — 클릭하여 내용 검사`}
-                          className={cn(
-                            "pointer-events-auto absolute border-2 bg-transparent transition hover:bg-white/10",
-                            selectedBoxIdx === i
-                              ? "border-amber-300"
-                              : suspect
-                                ? "border-red-500"
-                                : "border-emerald-400",
-                          )}
-                          style={{
-                            left: `${left}%`,
-                            top: `${top}%`,
-                            width: `${width}%`,
-                            height: `${height}%`,
-                          }}
-                          disabled={busy !== null}
-                          onClick={() => void runInspect(b.bbox_xyxy, b.event_id, i)}
-                        />
-                      );
-                    })}
+          <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-12">
+            <div className="self-start lg:col-span-7">
+              <div className="overflow-hidden rounded-lg border border-border bg-slate-950">
+                <div className="flex justify-center">
+                  <div className="relative max-h-[420px] max-w-full">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={img}
+                        alt="탐지 결과 미리보기"
+                        className="block h-auto max-h-[420px] w-auto max-w-full"
+                        onLoad={(e) => {
+                          const el = e.currentTarget;
+                          const next = {
+                            w: el.naturalWidth || 1,
+                            h: el.naturalHeight || 1,
+                          };
+                          imgNaturalRef.current = next;
+                          setImgNatural(next);
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-48 w-full min-w-[240px] items-center justify-center text-xs text-slate-400">
+                        미리보기 준비 중…
+                      </div>
+                    )}
+                    {img && boxes.length > 0 && (
+                      <div className="pointer-events-none absolute inset-0">
+                        {boxes.map((b, i) => {
+                          const [x1, y1, x2, y2] = b.bbox_xyxy;
+                          const nw = imgNatural.w;
+                          const nh = imgNatural.h;
+                          const left = (x1 / nw) * 100;
+                          const top = (y1 / nh) * 100;
+                          const width = ((x2 - x1) / nw) * 100;
+                          const height = ((y2 - y1) / nh) * 100;
+                          const suspect = Boolean(b.illegal_candidate);
+                          return (
+                            <button
+                              key={`${b.event_id ?? i}-${i}`}
+                              type="button"
+                              title={`${b.label} — 클릭하여 내용 검사`}
+                              className={cn(
+                                "pointer-events-auto absolute border-2 bg-transparent transition hover:bg-white/10",
+                                selectedBoxIdx === i
+                                  ? "border-amber-300"
+                                  : suspect
+                                    ? "border-red-500"
+                                    : "border-emerald-400",
+                              )}
+                              style={{
+                                left: `${left}%`,
+                                top: `${top}%`,
+                                width: `${width}%`,
+                                height: `${height}%`,
+                              }}
+                              disabled={busy !== null}
+                              onClick={() => void runInspect(b.bbox_xyxy, b.event_id, i)}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-              <p className="bg-black/50 px-2 py-1 text-[10px] text-slate-200">
-                박스를 클릭하면 해당 현수막만 OCR·마크 검사합니다.
-              </p>
+                <p className="bg-black/50 px-2 py-1 text-[10px] text-slate-200">
+                  박스를 클릭하면 해당 현수막만 OCR·마크 검사합니다.
+                </p>
+              </div>
             </div>
-            <div className="space-y-2 lg:col-span-5">
+            <div className="max-h-[min(70vh,640px)] space-y-2 overflow-y-auto lg:col-span-5">
               <div className="rounded-lg border border-border bg-slate-50 p-3 text-xs">
                 <p className="font-semibold text-slate-800">
                   {result
@@ -350,6 +443,40 @@ export function BannerInferenceUpload() {
                   </p>
                 )}
               </div>
+
+              {aiReview && (
+                <div className="space-y-2 rounded-lg border border-sky-200 bg-sky-50/70 p-3 text-[11px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-slate-800">Claude 보조 분석</p>
+                    <Badge variant="outline">
+                      검토 {aiReview.review_priority}
+                      {aiReview.source === "mock" ? " · 샘플" : ""}
+                    </Badge>
+                  </div>
+                  <p className="text-slate-700">{aiReview.summary}</p>
+                  {aiReview.illegal_notes.length > 0 && (
+                    <div>
+                      <p className="mb-0.5 font-medium text-slate-800">불법 의심·검토</p>
+                      <ul className="max-h-28 space-y-0.5 overflow-y-auto text-slate-600">
+                        {aiReview.illegal_notes.map((n) => (
+                          <li key={n}>• {n}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {aiReview.missed_banners.length > 0 && (
+                    <div>
+                      <p className="mb-0.5 font-medium text-slate-800">놓쳤을 수 있는 현수막</p>
+                      <ul className="max-h-28 space-y-0.5 overflow-y-auto text-slate-600">
+                        {aiReview.missed_banners.map((n) => (
+                          <li key={n}>• {n}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-muted">{aiReview.disclaimer}</p>
+                </div>
+              )}
 
               {inspect && (
                 <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50/60 p-3 text-[11px]">
@@ -419,10 +546,6 @@ export function BannerInferenceUpload() {
             </div>
           </div>
         )}
-
-        <p className="text-[10px] text-muted">
-          권장 테스트: <code>platform/datasets/banner_mvp_all/images/val/*.jpg</code>
-        </p>
       </CardContent>
     </Card>
   );

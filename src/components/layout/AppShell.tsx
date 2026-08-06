@@ -43,7 +43,7 @@ const pageTitles: Record<string, string> = {
   "/facility-management": "시설 관리",
   "/parking-analysis": "주차 분석",
   "/snow-removal": "제설 관리",
-  "/cctv": "CCTV AI 탐지",
+  "/cctv": "현수막 존재 · 불법 의심",
   "/complaint-management": "민원 관리",
   "/ai-report": "AI 리포트",
   "/settings": "설정",

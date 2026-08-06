@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 const pipeline = [
-  "현수막 탐지",
+  "존재 탐지",
   "객체 추적",
   "위치·허가 조회",
-  "불법 가능성",
+  "의심 점수",
   "우선순위",
 ] as const;
 
@@ -21,14 +21,14 @@ export function IllegalBannerExample({ className }: { className?: string }) {
     >
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div>
-          <p className="text-xs text-muted">2단계 판정 · 설봉공원 입구</p>
+          <p className="text-xs text-muted">예시 · 설봉공원 입구</p>
           <h2 className="text-sm font-semibold text-slate-800">
-            현수막 탐지 → 불법 가능성 후보
+            현수막 존재 탐지 → 불법 의심 후보
           </h2>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <Badge variant="outline">탐지 94%</Badge>
-          <Badge variant="urgent">불법 가능성 91</Badge>
+          <Badge variant="urgent">의심 점수 91</Badge>
           <Badge variant="high">우선순위 82</Badge>
         </div>
       </div>
@@ -94,7 +94,7 @@ export function IllegalBannerExample({ className }: { className?: string }) {
         </div>
       </div>
       <p className="shrink-0 border-t border-border px-4 py-2 text-[11px] text-muted">
-        CAM-설봉-001 · TRK-설봉-014 · 동일 객체 통합 · 불법 확정이 아닌 가능성 점수
+        CAM-설봉-001 · TRK-설봉-014 · 동일 객체 통합 · 불법 확정이 아닌 의심 점수
       </p>
     </div>
   );

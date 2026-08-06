@@ -70,6 +70,45 @@ export async function fetchAIReportSummary(
   return postLiveJSON<AIReportSummaryResult>("/api/ai/report-summary", { title, type });
 }
 
+export interface AIBannerReviewResult {
+  summary: string;
+  illegal_notes: string[];
+  missed_banners: string[];
+  review_priority: string;
+  disclaimer: string;
+  source: AISource;
+}
+
+export async function fetchAIBannerReview(input: {
+  imageBase64: string;
+  mediaType?: string;
+  detectionSummary: Record<string, unknown>;
+}): Promise<AIBannerReviewResult> {
+  return postLiveJSON<AIBannerReviewResult>("/api/ai/banner-review", {
+    image_base64: input.imageBase64,
+    media_type: input.mediaType ?? "image/jpeg",
+    detection_summary: input.detectionSummary,
+  });
+}
+
+export interface AIBannerReasonsResult {
+  summary: string;
+  reasons: string[];
+  next_actions: string[];
+  disclaimer: string;
+  source: AISource;
+}
+
+export async function fetchAIBannerReasons(input: {
+  candidate: Record<string, unknown>;
+  reasons: string[];
+}): Promise<AIBannerReasonsResult> {
+  return postLiveJSON<AIBannerReasonsResult>("/api/ai/banner-reasons", {
+    candidate: input.candidate,
+    reasons: input.reasons,
+  });
+}
+
 export function isValidPriority(value: string): value is Priority {
   return ["urgent", "high", "medium", "low"].includes(value);
 }

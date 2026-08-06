@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 function bannerHint(location: string) {
   const match = bannerCandidates.find((c) => c.location === location);
   if (!match) return null;
-  return `불법 가능성 ${match.illegalScore} · 우선순위 ${match.priorityScore}`;
+  return `의심 점수 ${match.illegalScore} · 우선순위 ${match.priorityScore}`;
 }
 
 const severityDot: Record<Severity, string> = {

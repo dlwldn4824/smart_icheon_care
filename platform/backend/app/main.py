@@ -51,10 +51,10 @@ repo = PublicDataRepository(_PUBLIC)
 
 _runs = Path("runs")
 _events = Path("events")
-if _runs.exists():
-    app.mount("/static/runs", StaticFiles(directory=str(_runs)), name="runs")
-if _events.exists():
-    app.mount("/static/events", StaticFiles(directory=str(_events)), name="events_static")
+_runs.mkdir(parents=True, exist_ok=True)
+_events.mkdir(parents=True, exist_ok=True)
+app.mount("/static/runs", StaticFiles(directory=str(_runs)), name="runs")
+app.mount("/static/events", StaticFiles(directory=str(_events)), name="events_static")
 
 
 class RiskRequest(BaseModel):
@@ -160,15 +160,99 @@ def health() -> dict[str, str]:
 
 
 def _thumb_http(path: str | None) -> str | None:
+    """Normalize stored thumb paths to browser-reachable /static/... URLs."""
     if not path:
         return None
     p = str(path).replace("\\", "/")
+    if p.startswith(("http://", "https://", "/static/", "/images/", "/demo/")):
+        return p
     marker = "/runs/"
     if marker in p:
         return "/static/runs/" + p.split(marker, 1)[1]
     if p.startswith("runs/"):
         return "/static/" + p
+    # Temp inference paths: copy into runs/ so the URL stays valid after /tmp cleanup
+    src = Path(path)
+    if src.is_file():
+        dest_dir = _runs / "inference" / "thumbs"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / src.name
+        if not dest.exists() or dest.stat().st_size == 0:
+            dest.write_bytes(src.read_bytes())
+        return f"/static/runs/inference/thumbs/{src.name}"
     return None
+
+
+def _with_public_thumbs(item: dict[str, Any], *, persist: bool = False) -> dict[str, Any]:
+    """Return a shallow-copied event payload with HTTP thumb_url."""
+    out = dict(item)
+    ev = dict(out.get("event") or {})
+    raw = ev.get("thumb_url")
+    public = _thumb_http(raw)
+    ev["thumb_url"] = public
+    out["event"] = ev
+    # If we salvaged a temp file into runs/, persist the stable path
+    if persist and public and public.startswith("/static/runs/") and raw and "/var/" in str(raw).replace("\\", "/"):
+        stored = dict(item)
+        stored_ev = dict(stored.get("event") or {})
+        stored_ev["thumb_url"] = str((_runs / public.removeprefix("/static/runs/")).resolve())
+        stored["event"] = stored_ev
+        try:
+            store.upsert(stored)
+        except Exception:
+            pass
+    return out
+
+
+def _attach_event_thumbs(
+    source_path: Path,
+    run_dir: Path,
+    scored: list[Any],
+    web_dir: Path,
+) -> None:
+    """Write per-event crop thumbs under runs/ and set event['thumb_url']."""
+    import cv2
+
+    frame = cv2.imread(str(source_path))
+    if frame is None or source_path.suffix.lower() in {".mp4", ".mov", ".avi", ".mkv"}:
+        rep_dir = run_dir / "representative_frames"
+        reps = sorted(rep_dir.glob("*.jpg")) if rep_dir.exists() else []
+        if reps:
+            frame = cv2.imread(str(reps[0]))
+
+    thumb_dir = web_dir / "thumbs"
+    thumb_dir.mkdir(parents=True, exist_ok=True)
+    h, w = (frame.shape[:2] if frame is not None else (0, 0))
+
+    for s in scored:
+        ev = s.event if hasattr(s, "event") else (s.get("event") or {})
+        eid = str(ev.get("event_id") or "unknown")
+        # Prefer pipeline representative frame if present
+        rep = run_dir / "representative_frames" / f"{eid}.jpg"
+        crop = None
+        if rep.is_file():
+            crop = cv2.imread(str(rep))
+        if crop is None and frame is not None:
+            bbox = ev.get("bbox_xyxy") or []
+            if len(bbox) == 4:
+                x1, y1, x2, y2 = [int(float(v)) for v in bbox]
+                x1, y1 = max(0, x1), max(0, y1)
+                x2, y2 = min(w, x2), min(h, y2)
+                if x2 > x1 and y2 > y1:
+                    crop = frame[y1:y2, x1:x2].copy()
+            if crop is None:
+                crop = frame
+        if crop is None:
+            continue
+        out = thumb_dir / f"{eid}.jpg"
+        cv2.imwrite(str(out), crop, [int(cv2.IMWRITE_JPEG_QUALITY), 88])
+        # Store path under runs/ so _thumb_http can map it
+        rel = str(out.resolve())
+        if hasattr(s, "event"):
+            s.event["thumb_url"] = rel
+        else:
+            ev["thumb_url"] = rel
+            s["event"] = ev
 
 
 def _build_inference_preview(
@@ -266,6 +350,8 @@ def _build_inference_preview(
     web_dir.mkdir(parents=True, exist_ok=True)
     preview_path = web_dir / "preview.jpg"
     cv2.imwrite(str(preview_path), vis, [int(cv2.IMWRITE_JPEG_QUALITY), 88])
+
+    _attach_event_thumbs(source_path, run_dir, scored, web_dir)
 
     ok, buf = cv2.imencode(".jpg", vis, [int(cv2.IMWRITE_JPEG_QUALITY), 88])
     preview_b64 = None
@@ -391,7 +477,7 @@ def list_events(
     rows_sorted = _sort_events(rows, sort)
     if flat:
         return [_flatten_event(r) for r in rows_sorted]
-    return rows_sorted
+    return [_with_public_thumbs(r, persist=True) for r in rows_sorted]
 
 
 @app.get("/events/{event_id}")
@@ -523,8 +609,9 @@ async def infer_image(
             source_mode="IMAGE",
         )
         scored = pipe.run(str(tmp_path), out_dir=run_dir, save_video=False)
-        saved = [store.upsert(scored_to_store(s)) for s in scored]
         preview = _build_inference_preview(tmp_path, run_dir, scored)
+        saved = [store.upsert(scored_to_store(s)) for s in scored]
+        saved = [_with_public_thumbs(s) for s in saved]
         return {
             "events": saved,
             "count": len(saved),
@@ -564,8 +651,9 @@ async def infer_video(
             source_mode="VIDEO",
         )
         scored = pipe.run(str(tmp_path), out_dir=run_dir, save_video=False)
-        saved = [store.upsert(scored_to_store(s)) for s in scored]
         preview = _build_inference_preview(tmp_path, run_dir, scored)
+        saved = [store.upsert(scored_to_store(s)) for s in scored]
+        saved = [_with_public_thumbs(s) for s in saved]
         return {
             "events": saved,
             "count": len(saved),

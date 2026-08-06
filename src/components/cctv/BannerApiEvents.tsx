@@ -13,15 +13,32 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
-const statusOptions = [
-  "DETECTED",
-  "REVIEW_PENDING",
-  "CONFIRMED",
-  "ASSIGNED",
-  "IN_PROGRESS",
-  "RESOLVED",
-  "DISMISSED",
-] as const;
+const STATUS_LABEL: Record<string, string> = {
+  DETECTED: "탐지됨",
+  REVIEW_PENDING: "검토 대기",
+  CONFIRMED: "공무원 확정",
+  ASSIGNED: "담당 배정",
+  IN_PROGRESS: "처리 중",
+  RESOLVED: "처리 완료",
+  DISMISSED: "기각",
+};
+
+/** 단방향 전이 — 현재 상태에서 누를 수 있는 다음 단계만 */
+const NEXT_ACTIONS: Record<string, { to: string; label: string; primary?: boolean }[]> = {
+  DETECTED: [
+    { to: "REVIEW_PENDING", label: "검토 요청", primary: true },
+    { to: "DISMISSED", label: "기각" },
+  ],
+  REVIEW_PENDING: [
+    { to: "CONFIRMED", label: "공무원 확정", primary: true },
+    { to: "DISMISSED", label: "기각" },
+  ],
+  CONFIRMED: [{ to: "ASSIGNED", label: "담당 배정", primary: true }],
+  ASSIGNED: [{ to: "IN_PROGRESS", label: "처리 시작", primary: true }],
+  IN_PROGRESS: [{ to: "RESOLVED", label: "처리 완료", primary: true }],
+  RESOLVED: [],
+  DISMISSED: [],
+};
 
 export function BannerApiEvents() {
   const [events, setEvents] = useState<VisionEvent[]>([]);
@@ -67,9 +84,9 @@ export function BannerApiEvents() {
       <Card className="lg:col-span-5">
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
           <div>
-            <CardTitle>불법 현수막(의심) 이벤트</CardTitle>
+            <CardTitle>현수막 존재 · 의심 후보 이벤트</CardTitle>
             <p className="mt-0.5 text-[11px] text-muted">
-              GET /api/v1/events · Risk≥70 → 불법 의심 · mock 없음
+              Risk 70 이상이면 불법 의심 후보로 표시됩니다
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -79,7 +96,7 @@ export function BannerApiEvents() {
                 checked={illegalOnly}
                 onChange={(e) => setIllegalOnly(e.target.checked)}
               />
-              불법 의심만
+              의심 후보만
             </label>
             <Button size="sm" variant="outline" onClick={() => void load()}>
               새로고침
@@ -121,7 +138,7 @@ export function BannerApiEvents() {
                   }
                 >
                   {item.event.verdict === "ILLEGAL_SUSPECT" || item.event.illegal_candidate
-                    ? "불법의심"
+                    ? "의심 후보"
                     : item.event.verdict || item.illegal.level}
                 </Badge>
                 <p className="mt-0.5 text-[10px] font-bold text-primary">{item.priority.level}</p>
@@ -133,9 +150,9 @@ export function BannerApiEvents() {
 
       <Card className="lg:col-span-7">
         <CardHeader>
-          <CardTitle>이벤트 상세 · 1단계 Risk / 2단계 내용 검사</CardTitle>
+          <CardTitle>이벤트 상세 · 행정 처리</CardTitle>
           <p className="mt-0.5 text-[11px] text-muted">
-            최종 확정(CONFIRMED)은 공무원만. 좌표는 CCTV 근사 위치입니다.
+            AI는 후보만 제안합니다. 「공무원 확정」이 최종 불법 판단입니다.
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -143,27 +160,36 @@ export function BannerApiEvents() {
           {selected && (
             <>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <Metric label="탐지 신뢰도" value={`${(selected.event.det_conf * 100).toFixed(1)}%`} />
+                <Metric
+                  label="탐지 신뢰도"
+                  value={`${(selected.event.det_conf * 100).toFixed(0)}%`}
+                />
                 <Metric
                   label="1단계 판정"
-                  value={
-                    selected.event.verdict ||
-                    (selected.event.illegal_candidate ? "ILLEGAL_SUSPECT" : "LOW_RISK")
-                  }
+                  value={formatVerdict(
+                    selected.event.verdict ?? selected.verdict,
+                    selected.event.illegal_candidate ?? selected.illegal_candidate,
+                  )}
                 />
                 <Metric
-                  label="Risk / Priority"
-                  value={`${selected.event.risk_score ?? selected.illegal.score} · ${selected.priority.level}`}
+                  label="Risk · Priority"
+                  value={formatRiskPriority(
+                    selected.event.risk_score ?? selected.illegal.score,
+                    selected.priority.level,
+                  )}
                 />
-                <Metric label="상태" value={selected.event.status} />
+                <Metric
+                  label="상태"
+                  value={STATUS_LABEL[selected.event.status] ?? selected.event.status}
+                />
               </div>
               {selected.event.content_verdict && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-2 text-[11px]">
                   <p className="font-semibold text-slate-800">
-                    2단계 내용 검사 · {selected.event.content_verdict}
+                    2단계 내용 검사 · {formatVerdict(selected.event.content_verdict)}
                   </p>
                   {selected.event.ocr_text && (
-                    <p className="mt-1 text-slate-600">OCR: {selected.event.ocr_text}</p>
+                    <p className="mt-1 break-words text-slate-600">OCR: {selected.event.ocr_text}</p>
                   )}
                 </div>
               )}
@@ -184,25 +210,40 @@ export function BannerApiEvents() {
                   ))}
                 </ul>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {statusOptions.map((st) => (
-                  <Button
-                    key={st}
-                    size="sm"
-                    variant={selected.event.status === st ? "default" : "outline"}
-                    onClick={() =>
-                      void patchVisionEventStatus(
-                        selected.event.event_id,
-                        st,
-                        st === "CONFIRMED" ? "dashboard-officer" : undefined,
-                      )
-                        .then(load)
-                        .catch((e: Error) => setError(e.message))
-                    }
-                  >
-                    {st}
-                  </Button>
-                ))}
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap gap-1.5">
+                  {(NEXT_ACTIONS[selected.event.status] ?? []).length === 0 ? (
+                    <p className="text-xs text-slate-500">이 이벤트는 종료된 상태입니다.</p>
+                  ) : (
+                    (NEXT_ACTIONS[selected.event.status] ?? []).map((action) => (
+                      <Button
+                        key={action.to}
+                        size="sm"
+                        variant={action.primary ? "default" : "outline"}
+                        onClick={() => {
+                          const needsActor = ["CONFIRMED", "ASSIGNED", "RESOLVED"].includes(
+                            action.to,
+                          );
+                          void patchVisionEventStatus(selected.event.event_id, action.to, {
+                            actor: needsActor ? "이현수 주무관" : undefined,
+                            assignee: action.to === "ASSIGNED" ? "김담당" : undefined,
+                            department: action.to === "ASSIGNED" ? "도시경관과" : undefined,
+                            note:
+                              action.to === "ASSIGNED"
+                                ? "데모 · 현장 확인 배정"
+                                : action.to === "CONFIRMED"
+                                  ? "공무원 확정 (데모)"
+                                  : undefined,
+                          })
+                            .then(load)
+                            .catch((e: Error) => setError(e.message));
+                        }}
+                      >
+                        {action.label}
+                      </Button>
+                    ))
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -214,9 +255,37 @@ export function BannerApiEvents() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-slate-50/80 p-2">
-      <p className="text-[10px] text-muted">{label}</p>
-      <p className="text-sm font-semibold text-slate-800">{value}</p>
+    <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-slate-50/80 px-2 py-1.5">
+      <p className="truncate text-[10px] leading-tight text-muted">{label}</p>
+      <p
+        className="mt-0.5 truncate text-[11px] font-semibold leading-tight text-slate-800"
+        title={value}
+      >
+        {value}
+      </p>
     </div>
   );
+}
+
+function formatVerdict(v: string | undefined, illegalCandidate?: boolean): string {
+  const raw = String(v || (illegalCandidate ? "ILLEGAL_SUSPECT" : "LOW_RISK"))
+    .trim()
+    .toUpperCase();
+  if (raw === "ILLEGAL_SUSPECT") return "의심 후보";
+  if (raw === "LOW_RISK") return "저위험";
+  if (raw === "LIKELY_LEGAL") return "합법 추정";
+  if (raw === "NEEDS_REVIEW") return "추가 검토";
+  if (raw.length > 8) return `${raw.slice(0, 7)}…`;
+  return raw;
+}
+
+function formatRiskPriority(risk: number | undefined, level: string | undefined): string {
+  const score =
+    typeof risk === "number"
+      ? risk <= 1
+        ? Math.round(risk * 100)
+        : Math.round(risk)
+      : "-";
+  const pri = (level || "-").replace(/^PRIORITY[_-]?/i, "").slice(0, 4);
+  return `${score}/${pri}`;
 }

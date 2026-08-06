@@ -18,17 +18,15 @@ export default function CCTVPage() {
             <h1 className="text-lg font-bold">현수막 존재 탐지 · 불법 의심 후보</h1>
             <span className="flex items-center gap-1 text-[11px] font-medium text-green-600">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
-              업로드 MVP
+              데모
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-xs text-muted">
-            YOLO로 현수막 존재를 찾고, 공공데이터 fixture 기반 Risk로 불법 의심 후보를 표시합니다. 박스를
-            클릭하면 해당 배너만 OCR·마크 검사합니다. 최종 확정(CONFIRMED)은 공무원만 가능합니다. 라이브
-            CCTV(RTSP)는 미연동입니다.
+            YOLO로 현수막 존재를 찾고 Risk로 의심 후보를 표시합니다. 탐지 직후 Claude가 불법 의심·놓친
+            현수막을 보조 점검하고, 박스 클릭 시 OCR합니다. 최종 확정(CONFIRMED)은 공무원만 가능합니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5 text-xs">
-          <Badge variant="outline">API :8000</Badge>
           <Badge variant="info">Human-in-the-loop</Badge>
         </div>
       </div>
@@ -37,11 +35,7 @@ export default function CCTVPage() {
 
       <BannerApiEvents />
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:items-stretch">
-        <IllegalBannerExample className="lg:col-span-8" />
-        <IllegalParkingExample className="lg:col-span-2" />
-        <GrassOvergrowthExample className="lg:col-span-2" />
-      </div>
+      <IllegalBannerExample />
 
       <BannerPriorityQueue />
 
@@ -49,6 +43,16 @@ export default function CCTVPage() {
         <DetectionTimeline />
         <DetectionAnalytics />
       </div>
+
+      <details className="rounded-xl border border-border bg-white">
+        <summary className="cursor-pointer px-4 py-3 text-xs font-medium text-slate-600 hover:bg-slate-50">
+          확장 예시 · 불법 주차 / 잔디 과성장 (참고)
+        </summary>
+        <div className="grid grid-cols-1 gap-3 border-t border-border p-3 sm:grid-cols-2">
+          <IllegalParkingExample />
+          <GrassOvergrowthExample />
+        </div>
+      </details>
     </div>
   );
 }

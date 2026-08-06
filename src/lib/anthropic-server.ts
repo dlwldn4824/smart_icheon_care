@@ -9,6 +9,38 @@ export async function callAnthropic(
   userMessage: string,
   maxTokens = 1024,
 ): Promise<string> {
+  return callAnthropicContent(system, [{ type: "text", text: userMessage }], maxTokens);
+}
+
+/** Vision: user content can mix text + base64 images */
+export async function callAnthropicVision(
+  system: string,
+  text: string,
+  imageBase64: string,
+  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp" = "image/jpeg",
+  maxTokens = 1200,
+): Promise<string> {
+  const raw = imageBase64.includes(",")
+    ? imageBase64.slice(imageBase64.indexOf(",") + 1)
+    : imageBase64;
+  return callAnthropicContent(
+    system,
+    [
+      {
+        type: "image",
+        source: { type: "base64", media_type: mediaType, data: raw },
+      },
+      { type: "text", text },
+    ],
+    maxTokens,
+  );
+}
+
+async function callAnthropicContent(
+  system: string,
+  content: Array<Record<string, unknown>>,
+  maxTokens: number,
+): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY가 설정되지 않았습니다.");
@@ -27,7 +59,7 @@ export async function callAnthropic(
       model,
       max_tokens: maxTokens,
       system,
-      messages: [{ role: "user", content: userMessage }],
+      messages: [{ role: "user", content }],
     }),
   });
 

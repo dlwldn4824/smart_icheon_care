@@ -39,6 +39,34 @@ export type VisionEvent = {
 
 const DEFAULT_BASE = process.env.NEXT_PUBLIC_VISION_API_URL ?? "http://127.0.0.1:8000";
 
+/** Resolve FastAPI /static thumb paths (and fall back for missing thumbs). */
+export function resolveVisionMediaUrl(
+  thumbUrl: string | null | undefined,
+  options: { cameraId?: string; locationName?: string; baseUrl?: string } = {},
+): string {
+  const base = (options.baseUrl ?? DEFAULT_BASE).replace(/\/$/, "");
+  const FALLBACK = "/images/illegal-banner-square.png";
+  const url = (thumbUrl || "").trim();
+  if (!url || url.startsWith("/var/") || url.includes("/T/infer_")) {
+    return FALLBACK;
+  }
+  if (
+    url.startsWith("data:") ||
+    url.startsWith("blob:") ||
+    url.startsWith("/images/") ||
+    url.startsWith("/demo/")
+  ) {
+    return url;
+  }
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  if (url.startsWith("/static/")) {
+    return `${base}${url}`;
+  }
+  return FALLBACK;
+}
+
 export class VisionApiError extends Error {
   constructor(message: string) {
     super(message);
@@ -92,14 +120,24 @@ export async function fetchVisionStatistics(
 export async function patchVisionEventStatus(
   eventId: string,
   status: string,
-  actor?: string,
+  options: {
+    actor?: string;
+    assignee?: string;
+    department?: string;
+    note?: string;
+  } = {},
   baseUrl: string = DEFAULT_BASE,
 ): Promise<VisionEvent> {
   const url = `${baseUrl.replace(/\/$/, "")}/api/v1/events/${eventId}/status`;
+  const body: Record<string, string> = { status };
+  if (options.actor) body.actor = options.actor;
+  if (options.assignee) body.assignee = options.assignee;
+  if (options.department) body.department = options.department;
+  if (options.note) body.note = options.note;
   const res = await fetch(url, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, actor }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const text = await res.text();
